@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="img/favicon.png">
+    <title>The Right Документация v1.0.0</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/desert.css" rel="stylesheet">
+    <link href="css/docs.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    </head>
+
+    <body onload="prettyPrint()" data-spy="scroll" data-target="#side-nav" data-offset="300">
+        <div class="wrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12 col-md-9">
+                        <h1>Right - Responsive Admin Template</h1>
+                        <p>Right это довольно простой и легкий Bootstrap шаблон для административной панели вашего проекта.</p>
+                        <p>
+                            <strong>Версия:</strong> 1.0.0
+                        </p>
+                        <hr/>
+                        <h1>Документация</h1>
+                        <p>Далее располагается краткое описание ключевых моментов, которые могут помочь вам в процессе работы с шаблоном.</p>
+                        <h2 id="overview">Обзор</h2>
+                        <p>Помимо сочетания приятного и функционального дизайна, в основу Right заложены принципы ускорения процесса разработки и простоты дальнейщей поддержки проекта. Для этих целей в нем применяются такие инструменты как Pug (Jade) шаблонизатор и CSS-препроцессор Less. Весь исходный код собирается автоматически с помощью Gulp. Таким образом процесс разработки значительно ускоряется. Но применение этого инструментария не является обязательным условием использования Right в вашем проекте. Все исходные файлы уже собраны, включены в шаблон и подготовлены для вас.</p>
+                        <h3 id="ov-files">Структура Файлов</h3>
+<pre class="prettyprint linenums lang-html">Right/
+    ├── dist/                                 собраный шаблон
+    ├──── css/                                css-стили
+    ├──── data/                               json-данные
+    ├──── img/                                оптимизированные изображения
+    ├──── js/                                 js-скрипты
+    ├──── libs/                               сторонние библиотеки
+    ├──── blank.html                          html-страницы
+              .
+              все функциональные *.html страницы
+              .
+    ├── source/                               исходные файлы
+    ├──── data/                               json-данные
+    ├──── img/                                исходные изображения
+    ├──── pug/                                Pug-шаблоны
+    ├──── js/                                 js-скрипты
+    ├──── less/                               Less-стили
+    ├──── libs/                               сторонние изображения
+    ├── docs/                                 документация
+     gulpfile.json                             конфиг Gulp
+     package.json                              конфиг NPM
+</pre>
+                        <h3 id="ov-layout">Структура Шаблона</h3>
+                        <p>Все страницы (за исключением login.html) состоят из следующих частей:</p>
+                        <ol>
+                            <li><code>.wrapper</code> - общий контейнер всех элементов</li>
+                            <li><code>.header-navbar</code> - панел верхней навигации</li>
+                            <li><code>.dashboard</code> - контейнер левого меню и контента</li>
+                            <li><code>.sidebar</code> - левое навигационное меню</li>
+                            <li><code>.main</code> - общий контейнер содержания страницы</li>
+                        </ol>
+<pre class="prettyprint linenums lang-html">&lt;div class=&quot;wrapper&quot;&gt;
+    &lt;nav class=&quot;header-navbar&quot;&gt;&lt;/nav&gt;
+    &lt;div class=&quot;dashboard&quot;&gt;
+        &lt;div class=&quot;sidebar&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;main&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+                        <h3 id="ov-responsivity">Адаптивность</h3>
+                        <p>Когда ширина страницы становится меньше чем 768px, шаблон адаптируется. <code>.sidebar</code> уходит за рамки страницы и появляется снова после нажатия кнопки меню. <code>.header-navbar-mobile</code> замещает <code>.topnavbar</code> и содержит кнопку вызова меню и заголовок страницы.</p>
+                        <img src="img/screens.png" class="img-responsive" alt="Responsivity">
+                        <h3 id="ov-pages">Функциональные Страницы</h3>
+                        <p>Шаблон включает 8 функциональных страниц:</p>
+                        <ol>
+                            <li><code>index.html</code> - страница с общей статистикой и информационными виджетами.</li>
+                            <li><code>products.html</code> - страница для управления списком товаров.</li>
+                            <li><code>orders.html</code> - страница заказов.</li>
+                            <li><code>users.html</code> - страница управления пользователями.</li>
+                            <li><code>login.html</code> - страница авторизации.</li>
+                            <li><code>blank.html</code> - пустая страница, служит основой для создания новых.</li>
+                            <li><code>inbox.html</code> - страница сообщений.</li>
+                            <li><code>compose.html</code> - форма нового сообщения.</li>
+                        </ol>
+                        <p>Помимо этого в шаблоне присутствуют некоторые демонстрационные страницы, которые служат для описания отдельных компонентов интерфейса.</p>
+                        <h2 id="build">Сборка Проекта</h2>
+                        <p>Автоматическая сборка проекта играет важную роль в современной разработке. Если вы не используете ее в своей работе, тогда мы настоятельно рекоментдуем вам ознакомиться с такими проектами, как Gulp, Grunt или Webpack. Они помогут вам избежать большого количества рутинной работы и повысят качество и скорость вашей разработки.</p>
+                        <h3 id="b-start">Начало работы</h3>
+                        <p>Для начала, вам нужно иметь установленный Node.js. Если у вас его еще нет, то вы можете взять его с официального сайта <a href="https://nodejs.org">nodejs.org</a>.</p>
+                        <p>После того, как Node.js установлен, нужно перейти в корневую папку шаблона, где лежит файл <code>package.json</code>. Далее необходимо загрузить зависимости. Запустите следующую команду в вашей командной строке:</p>
+<pre class="prettyprint">npm install</pre>
+                        <p>Таким путем мы установим Gulp и необходимые модули для него.</p>
+                        <p>Если в проецессе установки возникают какие-либо ошибки, то убедитесь, что Node.js и npm установлены корректно, и вы находитесь в нужной директории. Также, можно попробовать запустить установку от имени администратора.</p>
+                        <h3 id="b-gulp">Gulp</h3>
+                        <p><a href="http://gulpjs.com/">Gulp.js</a> это система автоматческой сборки, которую мы будем использовать для генерации HTML-страниц из pug-шаблонов, и CSS-стилей из LESS-файлов. Она также позволяет наладить процесс сжатия и минификации файлов, оптимизации изображений и многое другое. Большинство необходимых команд для этих задач уже определено в файле <code>gulpfile.js</code>.</p>
+                        <p>Для запуска сборки проекта используется следующая команда:</p>
+<pre class="prettyprint">npm run build</pre>
+                        <p>Это запустит сборщик, который обработает все файлы в папке <code>./source</code> и сохранит результат в папку <code>./dist</code>.</p>
+                        <p>Команда <code>npm run watch</code> позволит обрабатывать все изменения файлов из <code>./source</code> в режиме реального времени и автоматически обновлять содержимое <code>./dist</code>.</p>
+                        <p>Чтобы последовательно запустить задачи <code>build</code> and <code>watch</code> можно использовать команду <code>npm run dev</code>.</p>
+                        <p><code>npm run clean</code> удаляет содержимое <code>./dist</code>.</p>
+                        <h3 id="b-jade">Pug</h3>
+                        <p><a href="https://pugjs.org">Pug</a> это мощный html-шаблонизатор, котрый позволяет одновременно упростить и ускорить процесс разработки и поддержки html-проектов. Это инструмент ранее был переименован из Jade. Подробнее ознакомиться с его возможностями и синтаксисом вы можете на его официальном сайте.</p>
+                        <p>Структура pug-шаблонов:</p>
+<pre class="prettyprint linenums lang-html">Right/
+  ├ source/                              исходные файлы
+  ├───pug/                               pug директория
+  ├──── include/                         файлы со статическим содержимым
+  ├──── parts/                           общие части страниц
+  ├────── layout.pug                     общий шаблон
+  ├────── main.pug                       основной блок страницы
+  ├────── navbar.pug                     верхняя навигация
+  ├────── sidebar.pug                    левое навигационное меню
+  ├──── blank.pug                        пример итоговой страницы
+         .
+         .
+         все итоговые *.pug страницы
+</pre>
+                        <p>Любая итоговая страница начинается с наследования общего шаблона <code> layout.pug </code>, котрый в общих чертах выглядит следующим образом:</p>
+<pre class="prettyprint linenums lang-html">doctype html
+html(lang="en")
+    head
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='IE=edge')
+        meta(name='viewport', content='width=device-width, initial-scale=1')
+        title Right - Bootstrap Admin Template
+        block css
+        link(href='css/right.css', rel='stylesheet')
+    block vars
+    body
+        .wrapper
+            include ./navbar.pug
+            .dashboard
+                include ./sidebar.pug
+                include ./main.pug
+        script(src='libs/jquery/jquery.min.js')
+        script(src='libs/bootstrap/js/bootstrap.min.js')
+        block js
+        script(src='js/main.js')
+</pre>
+                        <p>Каждая страница строится на основе этого шаблона, подключая отдельные части через оператор <code>include</code>, и заменя особые тэги <code>block</code> на собственное содержимое.</p>
+                        <p>Все итоговые страницы выглядят следующим образом (на примере <code> blank.pug </code>):</p>
+<pre class="prettyprint linenums lang-html">extends ./parts/layout.pug
+block vars
+    - page = 'Blank';
+block main
+    .main-heading
+        .main-title
+            ol.breadcrumb
+                li.active Blank
+        .main-filter
+            form.main-filter__search
+                .input-group
+                    input.form-control(type="text", placeholder="Search...")
+                    span.input-group-btn
+                        button.btn.btn-default(type="button")
+                            .fa.fa-search
+    .container-fluid.half-padding
+        .template.template__blank
+            .row
+                .col-md-12
+                    .panel.panel-danger
+                        .panel-heading
+                            h3.panel-title Blank Page
+                        .panel-body
+                            p This is a blank page.
+</pre>
+                        <h3 id="b-less">Less</h3>
+                        <p><a href="http://lesscss.org/">Less</a> это CSS пре-процессор. Он расширяет стандартные возможности CSS, добавляя такие возможности, как переменные, примеси, функции и много другое. Он позволяет создавать более поддерживаемый, управляемый и расширяемый CSS.</p>
+                        <p>Структура less директории:</p>
+<pre class="prettyprint linenums lang-html">Right/
+  ├ source/                              исходные файлы
+  ├───less/                              less директория
+  ├──── dark/                            контейнер цветовой схемы
+  ├────── blocks/                        элементы структуры шаблона
+  ├────── bootstrap/                     измененный bootstrap стили
+  ├────── libs/                          измененные сторонние библиотеки
+  ├────── colors.less                    цвета
+  ├────── mixins.less                    less примеси
+  ├──── right.dark.less                  общий файл цветовой схемы
+</pre>
+                        <h2 id="themes">Цветовые Схемы</h2>
+                        <p>Версия 1.0.0 содержит 3 цветовые схемы: <code>dark</code>, <code>lilac</code> и <code>light</code>. Стили для каждой из них находятся в отдельном файле. Поэтому, для использования определенной цветовой схемы, вам нужно подключить на страницу соответствующий файл стилей.</p>
+<pre class="prettyprint  lang-html">Right/
+  ├ dist/
+  ├─── css/
+  ├───── right.dark.css             Dark схема
+  ├───── right.light.css            Light схема
+  ├───── right.lilac.css            Lilac схема
+</pre>
+                        <h2 id="log">История Изменений</h2>
+                        <h3>Версия 0.1.0 -> 0.2.0</h3>
+                        <p>В версии 0.2.0 мы добавили новый раздел сообщений, переработали структуру левого меню и расширили его четырьмя дополнительными панелями быстрой навигации. Также небольшие изменения коснулись структуры верхнего меню. Подключение некоторых общих библиотек было выведено в общий шаблон.</p>
+                        <p><a data-toggle="collapse" href="#new_0_2_0">Список новых файлов</a></p>
+                        <div class="collapse" id="new_0_2_0">
+<pre class="prettyprint linenums lang-html">Right/
+  ├ source/
+  ├─── js/
+  ├───── mails.js
+  ├─── less/
+  ├───── layout/
+  ├─────── blocks/
+  ├───────── mailbox.less
+  ├───────── quickmenu.less
+  ├───────── sidestat.less
+  ├─── jade
+  ├───── compose.jade
+  ├───── inbox.jade
+  ├───── sent.jade
+  ├ dist/
+  ├─── js/
+  ├───── template/
+  ├─────── mails.js
+  ├─── compose.html
+  ├─── inbox.html
+  ├─── sent.html
+</pre>
+                        </div>
+                        <p><a data-toggle="collapse" href="#changed_0_2_0">Список измененных файлов</a></p>
+                        <div class="collapse" id="changed_0_2_0">
+<pre class="prettyprint linenums lang-html">Right/
+  ├ source/
+  ├── img
+  ├──── paint.svg
+  ├── js
+  ├──── template
+  ├────── controls.js
+  ├────── index.js
+  ├────── mails.js
+  ├──── main.js
+  ├── less
+  ├──── layout
+  ├────── blocks
+  ├──────── body.less
+  ├──────── header-navbar.less
+  ├──────── mailbox.less
+  ├──────── quickmenu.less
+  ├──────── sidebar.less
+  ├──────── sidestat.less
+  ├──────── template.less
+  ├──────── widgets.less
+  ├────── bootstrap
+  ├──────── dropdown-menu.less
+  ├────── libs
+  ├──────── inputNumber.less
+  ├──────── jquery.scrollbar.less
+  ├──────── summernote.less
+  ├──────── switch.less
+  ├────── themes
+  ├──────── solid.less
+  ├──────── transparent.less
+  ├────── demo.less
+  ├────── right.less
+  ├── jade
+  ├──── parts
+  ├────── layout.jade
+  ├────── navbar.jade
+  ├────── sidebar.jade
+  ├──── charts.jade
+  ├──── compose.jade
+  ├──── controls.jade
+  ├──── inbox.jade
+  ├──── index.jade
+  ├──── login.jade
+  ├──── orders.jade
+  ├──── products.jade
+  ├──── sent.jade
+  ├──── users.jade
+  ├ dist
+  ├── css
+  ├──── demo.css
+  ├──── demo.min.css
+  ├──── right.css
+  ├──── right.min.css
+  ├── img
+  ├──── paint.svg
+  ├── js
+  ├──── template
+  ├────── controls.js
+  ├────── index.js
+  ├────── mails.js
+  ├──── main.js
+  ├──── right.min.js
+  ├── blank.html
+  ├── buttons.html
+  ├── charts.html
+  ├── compose.html
+  ├── controls.html
+  ├── general.html
+  ├── inbox.html
+  ├── index.html
+  ├── login.html
+  ├── modals.html
+  ├── orders.html
+  ├── panels.html
+  ├── products.html
+  ├── sent.html
+  ├── table_data.html
+  ├── table_sortable.html
+  ├── table_static.html
+  ├── tabs.html
+  ├── texteditor.html
+  ├── users.html
+  ├── validation.html
+  ├ bower.json
+  ├ gulpfile.js
+  ├ package.json
+</pre>
+                        </div>
+                        <h3>Версия 0.2.0 -> 0.3.0</h3>
+                        <p>В версии 0.3.0 мы добавили светлую цветовую схему и поделили все схемы на разные файлы. Также были внесены другие незначительные изменения и правки.</p>
+                        <p><a data-toggle="collapse" href="#new_0_3_0">Список новых файлов</a></p>
+                        <div class="collapse" id="new_0_3_0">
+<pre class="prettyprint linenums lang-html">Right/
+  ├ dist
+  ├── css
+  ├──── min
+  ├────── right.dark.min.css
+  ├────── right.light.min.css
+  ├────── right.lilac.min.css
+  ├──── right.dark.css
+  ├──── right.light.css
+  ├──── right.lilac.css
+  ├── img
+  ├──── rightlogo_dark.png
+  ├── data
+  ├──── orders
+  ├────── finished.json
+  ├────── new.json
+  ├────── processing.json
+  ├──── products
+  ├────── affilate.json
+  ├────── brand.json
+  ├────── digital.json
+  ├──── users
+  ├────── admins.json
+  ├────── customers.json
+  ├────── managers.json
+  ├ source
+  ├── less
+  ├──── dark
+  ├────── blocks
+  ├──────── body.less
+  ├──────── chart.less
+  ├──────── dashboard.less
+  ├──────── fileupload.less
+  ├──────── layout.less
+  ├──────── logo.less
+  ├──────── main-heading.less
+  ├──────── sidestat.less
+  ├──────── template.less
+  ├──────── userbar.less
+  ├──────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── btn.less
+  ├──────── form.less
+  ├──────── grid.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── pagination.less
+  ├──────── progress.less
+  ├──────── tooltip.less
+  ├────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── breadcrumb.less
+  ├──────── btn.less
+  ├──────── dropdown-menu.less
+  ├──────── form.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── paddings.less
+  ├──────── pagination.less
+  ├──────── panels.less
+  ├──────── progress.less
+  ├──────── table.less
+  ├──────── tabs.less
+  ├──────── tooltip.less
+  ├────── libs
+  ├──────── checkbox.less
+  ├──────── codemirror.less
+  ├──────── datatable.less
+  ├──────── datepicker.less
+  ├──────── inputNumber.less
+  ├──────── ionRangeSlider.less
+  ├──────── jquery.scrollbar.less
+  ├──────── morris.less
+  ├──────── select.less
+  ├──────── selectize.less
+  ├──────── sparkline.less
+  ├──────── summernote.less
+  ├──────── switch.less
+  ├──────── timepicker.less
+  ├────── colors.less
+  ├────── mixins.less
+  ├──── light
+  ├────── blocks
+  ├──────── body.less
+  ├──────── chart.less
+  ├──────── dashboard.less
+  ├──────── fileupload.less
+  ├──────── layout.less
+  ├──────── logo.less
+  ├──────── main-heading.less
+  ├──────── sidestat.less
+  ├──────── template.less
+  ├──────── userbar.less
+  ├──────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── btn.less
+  ├──────── form.less
+  ├──────── grid.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── pagination.less
+  ├──────── progress.less
+  ├──────── tooltip.less
+  ├────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── breadcrumb.less
+  ├──────── btn.less
+  ├──────── dropdown-menu.less
+  ├──────── form.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── paddings.less
+  ├──────── pagination.less
+  ├──────── panels.less
+  ├──────── progress.less
+  ├──────── table.less
+  ├──────── tabs.less
+  ├──────── tooltip.less
+  ├────── libs
+  ├──────── checkbox.less
+  ├──────── codemirror.less
+  ├──────── datatable.less
+  ├──────── datepicker.less
+  ├──────── inputNumber.less
+  ├──────── ionRangeSlider.less
+  ├──────── jquery.scrollbar.less
+  ├──────── morris.less
+  ├──────── select.less
+  ├──────── selectize.less
+  ├──────── sparkline.less
+  ├──────── summernote.less
+  ├──────── switch.less
+  ├──────── timepicker.less
+  ├────── colors.less
+  ├────── mixins.less
+  ├──── lilac
+  ├────── blocks
+  ├──────── body.less
+  ├──────── chart.less
+  ├──────── dashboard.less
+  ├──────── fileupload.less
+  ├──────── layout.less
+  ├──────── logo.less
+  ├──────── main-heading.less
+  ├──────── sidestat.less
+  ├──────── template.less
+  ├──────── userbar.less
+  ├──────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── btn.less
+  ├──────── form.less
+  ├──────── grid.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── pagination.less
+  ├──────── progress.less
+  ├──────── tooltip.less
+  ├────── bootstrap
+  ├──────── alert.less
+  ├──────── badge.less
+  ├──────── breadcrumb.less
+  ├──────── btn.less
+  ├──────── dropdown-menu.less
+  ├──────── form.less
+  ├──────── label.less
+  ├──────── modal.less
+  ├──────── paddings.less
+  ├──────── pagination.less
+  ├──────── panels.less
+  ├──────── progress.less
+  ├──────── table.less
+  ├──────── tabs.less
+  ├──────── tooltip.less
+  ├────── libs
+  ├──────── checkbox.less
+  ├──────── codemirror.less
+  ├──────── datatable.less
+  ├──────── datepicker.less
+  ├──────── inputNumber.less
+  ├──────── ionRangeSlider.less
+  ├──────── jquery.scrollbar.less
+  ├──────── morris.less
+  ├──────── select.less
+  ├──────── selectize.less
+  ├──────── sparkline.less
+  ├──────── summernote.less
+  ├──────── switch.less
+  ├──────── timepicker.less
+  ├────── colors.less
+  ├────── mixins.less
+  ├──── right.dark.less
+  ├──── right.light.less
+  ├──── right.lilac.less
+  ├── data
+  ├──── orders
+  ├────── finished.json
+  ├────── new.json
+  ├────── processing.json
+  ├──── products
+  ├────── affilate.json
+  ├────── brand.json
+  ├────── digital.json
+  ├──── users
+  ├────── admins.json
+  ├────── customers.json
+  ├────── managers.json
+  ├── img
+  ├──── rightlogo_dark.png
+</pre>
+                        </div>
+                        <p><a data-toggle="collapse" href="#changed_0_3_0">Список измененных файлов</a></p>
+                        <div class="collapse" id="changed_0_3_0">
+<pre class="prettyprint linenums lang-html">Right/
+  ├ dist
+  ├── js
+  ├──── template
+  ├────── orders.js
+  ├────── products.js
+  ├────── users.js
+  ├──── demo.js
+  ├──── main.js
+  ├── libs
+  ├──── jquery.scrollbar
+  ├────── jquery.scrollbar.js
+  ├────── jquery.scrollbar.min.js
+  ├── blank.html
+  ├── buttons.html
+  ├── charts.html
+  ├── compose.html
+  ├── controls.html
+  ├── general.html
+  ├── inbox.html
+  ├── index.html
+  ├── login.html
+  ├── modals.html
+  ├── orders.html
+  ├── panels.html
+  ├── products.html
+  ├── sent.html
+  ├── table_data.html
+  ├── table_sortable.html
+  ├── table_static.html
+  ├── tabs.html
+  ├── texteditor.html
+  ├── users.html
+  ├── validation.html
+  ├ source
+  ├── jade
+  ├──── include
+  ├────── orders_finished.jade
+  ├────── orders_new.jade
+  ├────── orders_processing.jade
+  ├────── products_affilate.jade
+  ├────── products_brand.jade
+  ├────── products_digital.jade
+  ├────── users_admins.jade
+  ├────── users_customers.jade
+  ├────── users_managers.jade
+  ├──── parts
+  ├────── layout.jade
+  ├────── main.jade
+  ├────── navbar.jade
+  ├────── sidebar.jade
+  ├──── buttons.jade
+  ├──── login.jade
+  ├──── orders.jade
+  ├──── panels.jade
+  ├──── products.jade
+  ├──── users.jade
+  ├── js
+  ├──── template
+  ├────── orders.js
+  ├────── products.js
+  ├────── users.js
+  ├──── main.js
+  ├── libs
+  ├──── jquery.scrollbar
+  ├────── jquery.scrollbar.js
+  ├────── jquery.scrollbar.min.js
+  ├ bower.json
+  ├ gulpfile.js
+  ├ package.json
+</pre>
+                        </div>
+                        <h3>Версия 0.3.0 -> 1.0.0</h3>
+                        <p>В версии 1.0.0 мы отказались от Bower в пользу NPM. Были обновлены все зависимости. Jade был преобразован в Pug.</p>
+                        <p><a data-toggle="collapse" href="#new_1_0_0">Список новых файлов</a></p>
+                        <div class="collapse" id="new_1_0_0">
+<pre class="prettyprint linenums lang-html">Right/
+  ├ source
+  ├── pug
+  ├──── include
+  ├────── tables
+  ├──────── orders_finished.pug
+  ├──────── orders_new.pug
+  ├──────── orders_processing.pug
+  ├──────── products_affilate.pug
+  ├──────── products_brand.pug
+  ├──────── products_digital.pug
+  ├──────── users_admins.pug
+  ├──────── users_customers.pug
+  ├──────── users_managers.pug
+  ├────── demo.pug
+  ├────── icons.pug
+  ├──── parts
+  ├────── layout.pug
+  ├────── main.pug
+  ├────── navbar.pug
+  ├────── sidebar.pug
+  ├──── blank.pug
+  ├──── buttons.pug
+  ├──── charts.pug
+  ├──── compose.pug
+  ├──── controls.pug
+  ├──── general.pug
+  ├──── inbox.pug
+  ├──── index.pug
+  ├──── login.pug
+  ├──── modals.pug
+  ├──── orders.pug
+  ├──── panels.pug
+  ├──── products.pug
+  ├──── sent.pug
+  ├──── table_data.pug
+  ├──── table_sortable.pug
+  ├──── table_static.pug
+  ├──── tabs.pug
+  ├──── texteditor.pug
+  ├──── users.pug
+  ├──── validation.pug
+</pre>
+                        </div>
+                        <p>Почти все файлы подверглись изменению.</p>
+                        <h2 id="support">Поддержка</h2>
+                        <p>На этом все. Мы надеемся, что вам понравится наш шаблон. Если у вас возникнут какие-либо вопросы, вы можете смело обращаться к нам на почту <a href="mailto:support@adminbootstrap.com">support@adminbootstrap.com</a> и в <a href="https://gitter.im/AdminBootstrap/Help" target="_blank">Gitter Chat</a>.</p>
+                    </div>
+
+                    <div class="hidden-xs hidden-sm col-md-3" id="sidebar">
+                        <img class="logo" src="img/rightlogo.png" alt="Right"/>
+                        <nav class="docs-nav" id="side-nav">
+                            <ul class="nav">
+                                <li>
+                                    <a href="#overview">Обзор</a>
+                                    <ul class="nav">
+                                        <li><a href="#ov-files">Структура файлов</a></li>
+                                        <li><a href="#ov-layout">Структура шаблона</a></li>
+                                        <li><a href="#ov-responsivity">Адаптивность</a></li>
+                                        <li><a href="#ov-pages">Функциональные страницы</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#build">Сборка проекта</a>
+                                    <ul class="nav">
+                                        <li><a href="#b-start">Начало работы</a></li>
+                                        <li><a href="#b-gulp">Gulp</a></li>
+                                        <li><a href="#b-jade">Pug</a></li>
+                                        <li><a href="#b-less">Less</a></li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a href="#themes">Цветовые схемы</a>
+                                </li>
+                                <li>
+                                    <a href="#log">История изменений</a>
+                                </li>
+                                <li>
+                                    <a href="#support">Поддержка</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <hr>
+
+                <footer>
+                    <p>&copy; 2017 <a href="https://adminbootstrap.com" target="_blank">adminbootstrap.com</a></p>
+                </footer>
+
+            </div>
+        </div>
+        <script src="js/jquery.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/prettify.js"></script>
+    </body>
+</html>

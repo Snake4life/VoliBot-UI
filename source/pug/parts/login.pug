@@ -1,0 +1,13 @@
+.login
+    form.login__form(action='javascript:void(0);')
+        .login__logo
+        .form-group
+            input.form-control#login__hostname(type='text', placeholder='IP Address / Hostname', name='hostname')
+        .form-group
+            input.form-control#login__password(type='password', placeholder='Password')
+        .form-group.login__action
+            .checkbox.login__remember
+                input#login__remember(type='checkbox', name='remember')
+                label(for='login__remember') Remember
+            .login__submit
+                button.btn.btn-default(type='submit') Connect

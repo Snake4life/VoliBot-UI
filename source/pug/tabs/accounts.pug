@@ -1,0 +1,153 @@
+.container-fluid.half-padding
+    .datalist.page.page_products.products.float-right
+        .row
+            .col-lg-3.col-md-3.col-sm-12.col-xs-12
+                .products-preview.datalist-preview
+                    .products-preview__cont
+                        .products-preview__name(title='Name') No client selected
+                        .products-preview__data
+                            .products-preview__icon
+                                div(style='')
+                            .products-preview__info
+                                .products-preview__edit
+                                    .btn-group.mr-2
+                                        button.btn.btn-danger.products-preview__logout(type="button") Logout
+                                        button.btn.btn-danger#preview__edit(type="button") Edit
+                                .products-preview__type Position
+                        .products-preview__props
+                            .products-preview__prop(title='Blue Essence')
+                                i.fa
+                                    img(src="/img/BE_icon.svg", style="height: 20px; width: auto;")
+                                span.products-preview__blue_essence BE
+                            .products-preview__prop(title='Riot Points')
+                                i.fa
+                                    img(src="/img/RP_icon.svg", style="height: 20px; width: auto;")
+                                span.products-preview__riot_points RP
+                            .products-preview__prop
+                                i.fa.fa-calendar
+                                span.products-preview__date Date
+                            .products-preview__prop
+                                i.fa.fa-heartbeat
+                                span.products-preview__status Status
+                            .products-preview__prop
+                                i.fa.fa-heartbeat
+                                span.products-preview__status Status
+                        .products-preview__note
+                            | Aliquam quis turpis eget elit sodales scelerisque. Mauris sit amet eros. Suspendisse accumsan tortor quis turpis. Sed ante.
+            .col-lg-9.col-md-9.col-sm-12.col-xs-12
+                .panel.panel-info
+                    .panel-heading
+                        h3.panel-title Accounts
+                    .panel-body
+                        p You have #[span#account_count] accounts.
+                        form.datalist-filter
+                            .input-group.datalist-filter__search
+                                input.form-control(type="text", placeholder="Find product")
+                                span.input-group-btn
+                                    button.btn.btn-default(type="button", role="button", data-toggle="collapse", data-target="#datalist-filter__detail", aria-controls="users__filter-detail", aria-expanded="false")
+                                        .fa.fa-filter
+                            .collapse#datalist-filter__detail
+                                .container-fluid.datalist-filter__detail
+                                    .row
+                                        .col-lg-6.col-md-6.col-sm-12.col-xs-12.input-daterange
+                                            .form-group
+                                                .input-group
+                                                    .input-group-addon
+                                                        i.fa.fa-calendar-minus-o
+                                                    input.form-control.datalist-filter__from(type="text", value="")
+                                            .form-group
+                                                .input-group
+                                                    .input-group-addon
+                                                        i.fa.fa-calendar-plus-o
+                                                    input.form-control.datalist-filter__to(type="text", value="")
+                                        .col-lg-6.col-md-6.col-sm-12.col-xs-12
+                                            .form-group
+                                                input.slider#datalist-filter__salary(type="text", name="", value="")
+                                            .form-group
+                                                .checkbox.checkbox-danger
+                                                    input#datalist-filter__actives(type='checkbox')
+                                                    label(for='datalist-filter__actives') Actives only
+                        .datalist__result
+                            ul.nav.nav-tabs(role="tablist")
+                                li.active(role="presentation")
+                                    a(href="#idle",aria-controls="idle", role="tab", data-toggle="tab") Idle&nbsp;
+                                li(role="presentation")
+                                    a(href="#leveling",aria-controls="leveling", role="tab", data-toggle="tab") Leveling&nbsp;
+                                li(role="presentation")
+                                    a(href="#finished",aria-controls="finished", role="tab", data-toggle="tab") Finished&nbsp;
+                                li(role="presentation")
+                                    a(href="#new",aria-controls="new", role="tab", data-toggle="tab")
+                                        i.fa.fa-plus
+                                        | &nbsp;New
+                            .tab-content
+                                .tab-pane#new(role="tabpanel")
+                                    form.form.products-new
+                                        .container-fluid
+                                            .row
+                                                .col-md-8
+                                                    .row
+                                                        .col-md-6
+                                                            .form-group
+                                                                .input-group
+                                                                    .input-group-addon
+                                                                        i.fa.fa-cube
+                                                                    input.form-control(type="text", placeholder="Title")
+                                                            .form-group
+                                                                .input-group
+                                                                    .input-group-addon
+                                                                        i.fa.fa-folder
+                                                                    select.selectpicker(placeholder="Type")
+                                                                        option(value="idle") Brand
+                                                                        option(value="leveling") Digital
+                                                                        option(value="finished") Affilate
+                                                        .col-md-6
+                                                            .form-group
+                                                                .input-group
+                                                                    .input-group-addon
+                                                                        i.fa.fa-usd
+                                                                    input.form-control(type="text", placeholder="Price")
+                                                            .form-group
+                                                                .input-group
+                                                                    .input-group-addon
+                                                                        i.fa.fa-heartbeat
+                                                                    select.selectpicker(placeholder="Status")
+                                                                        option(value="customer") Active
+                                                                        option(value="manager") Confirmed
+                                                                        option(value="admin") Blocked
+                                                    .row
+                                                        .col-md-12
+                                                            .form-group
+                                                                textarea.form-control(rows='3', placeholder='Note')
+                                                .col-md-4
+                                                    .fileupload
+                                                        label
+                                                            .fa.fa-image
+                                                            input(type='file')
+                                        button.btn.btn-success#AddAccount Save
+                                .tab-pane.active#idle(role="tabpanel")
+                                    .scrollable.scrollbar-macosx
+                                        .container-fluid
+                                            include ./include/tables/accounts_idle.pug
+                                .tab-pane#leveling(role="tabpanel")
+                                    .scrollable.scrollbar-macosx
+                                        .container-fluid
+                                            include ./include/tables/accounts_leveling.pug
+                                .tab-pane#finished(role="tabpanel")
+                                    .scrollable.scrollbar-macosx
+                                        .container-fluid
+                                            include ./include/tables/accounts_finished.pug
+block css
+    link(href='libs/datatables/css/dataTables.bootstrap.css', rel='stylesheet')
+    link(href='libs/selectize/css/selectize.default.css', rel='stylesheet')
+    link(href='libs/selectize/css/selectize.bootstrap3.css', rel='stylesheet')
+    link(href='libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css', rel='stylesheet')
+    link(href='libs/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css', rel='stylesheet')
+    link(href='libs/bootstrap-select/css/bootstrap-select.min.css', rel='stylesheet')
+block js
+    script(src='libs/datatables/js/jquery.dataTables.js')
+    script(src='libs/datatables/js/dataTables.select.js')
+    script(src='libs/datatables/js/dataTables.bootstrap.js')
+    script(src='libs/selectize/js/standalone/selectize.min.js')
+    script(src='libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js')
+    script(src='libs/bootstrap-select/js/bootstrap-select.min.js')
+    script(src='js/template/accounts.js')

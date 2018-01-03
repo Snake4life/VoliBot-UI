@@ -1,0 +1,18 @@
+extends ./parts/layout.pug
+block vars
+    - page = 'Dashboard';
+block main
+    .tab-content
+        .tab-pane.fade.active.in#Dashboard
+            include ./tabs/dashboard.pug
+        .tab-pane.fade#Accounts
+            include ./tabs/accounts.pug
+        .tab-pane.fade#Sessions
+            include ./tabs/sessions.pug
+block css
+    link(href='libs/bootstrap-select/css/bootstrap-select.min.css', rel='stylesheet')
+block js
+    script(src='libs/bootstrap-select/js/bootstrap-select.min.js')
+    script(src='libs/Chart.js/Chart.min.js')
+    script(src='js/template/index.js')
+    script(src='js/template/login.js')
