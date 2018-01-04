@@ -1,3 +1,6 @@
+/* global $ */
+/* global volibot */
+
 $(document).ready(function() {
 	var swal = window.swal = require('sweetalert2');
 	var lolVersion;
@@ -18,21 +21,7 @@ $(document).ready(function() {
 
 	$('.input-daterange').datepicker();
 
-	$('.slider').ionRangeSlider({
-		type: "double",
-		grid: false,
-		min: 0,
-		max: 0,
-		from: 0,
-		to: 0,
-		prefix: "$: ",
-		decorate_both: false,
-		onChange: function (data) {
-			tables.draw();
-		}
-	});
-
-	var slider = $(".slider").data("ionRangeSlider");
+	//var slider = $(".slider").data("ionRangeSlider");
 
 	// Table tab count update
 	function tabInfo(table) {
@@ -55,6 +44,11 @@ $(document).ready(function() {
 		product.find('.products-preview__name').text(summoner.displayName).attr('title', summoner.displayName);
 		product.find('.products-preview__blue_essence').text(wallet.ip).attr('title', wallet.ip);
 		product.find('.products-preview__riot_points').text(wallet.rp).attr('title', wallet.rp);
+		
+		//product.find('.products-preview__date').text(data[3]).attr('title', data[3]);
+		//product.find('.products-preview__type').text(data[7]).attr('title', data[7]);
+		//product.find('.products-preview__status').text(data[5]).attr('title', data[5]);
+
 
 		// Remove any previous handlers before assigning one, or we'll get one more every time a client is selected.
 		product.find('.products-preview__logout').off('click');
@@ -84,13 +78,17 @@ $(document).ready(function() {
 				console.log(data);
 			});
 		});
-		// product.find('.products-preview__date').text(data[3]).attr('title', data[3]);
-		// product.find('.products-preview__type').text(data[7]).attr('title', data[7]);
-		// product.find('.products-preview__status').text(data[5]).attr('title', data[5]);
 
+		// Fetch the profile picture from ddragon.
 		product.find('.products-preview__icon div')
 			   .css('background-image',
 			   		'url(http://ddragon.leagueoflegends.com/cdn/' + lolVersion + '/img/profileicon/' + summoner.profileIconId + '.png)');
+		
+		$(".slider").data("ionRangeSlider").update({
+    		min: 0,
+    		max: summoner.xpSinceLastLevel + summoner.xpUntilNextLevel,
+    		from: summoner.xpSinceLastLevel,
+		});
 		
 		var chartData = JSON.parse('['+$(data[6]).text()+']');
 		product.find('.products-preview__stat').sparkline(
@@ -138,50 +136,7 @@ $(document).ready(function() {
 						return data.level + (Math.min(data.percent, 99) * 0.01);
 					}
 				}
-			],
-			initComplete: function () {
-
-				//// Date filter filling
-				//this.api().column(3)
-				//	.cache( 'search' )
-				//	.sort()
-				//	.each( function ( date ) {
-				//		var min = new Date($('.datalist-filter__from').val());
-				//		var max = new Date($('.datalist-filter__to').val());
-				//		var val = new Date(date);
-
-				//		if ((val != 'Invalid Date') && ((val < min) || (min == 'Invalid Date'))) {
-				//			$('.datalist-filter__from').datepicker('setDate', new Date(date));
-				//		}
-				//		if ((val != 'Invalid Date') && ((val > max) || (max == 'Invalid Date'))) {
-				//			$('.datalist-filter__to').datepicker('setDate', new Date(date));
-				//		}
-
-				//	} );
-
-				//// Salary filter filling
-				//this.api().column(4)
-				//	.cache( 'search' )
-				//	.sort()
-				//	.each( function ( salary ) {
-				//		var options = slider.options,
-				//			salary = parseFloat(salary.replace(/[^0-9\.]+/g, ''));
-
-				//		if (salary < options.min) {
-				//			slider.update({
-				//				min: salary,
-				//				from: salary
-				//			});
-				//		}
-
-				//		if (salary > options.max) {
-				//			slider.update({
-				//				max: salary,
-				//				to: salary
-				//			});
-				//		}
-				//	} );
-			}
+			]
 		}).on('select', function ( e, dt, type, indexes ) {
 			var data = $(this).DataTable().rows( indexes ).data()[0];
 			previewUpdate(data);
@@ -198,64 +153,4 @@ $(document).ready(function() {
 	$('.datalist-filter__search input').on('keyup', function () {
 		tables.search( this.value ).draw();
 	} );
-
-	/*
-	$('.input-daterange').on('changeDate', function(e) {
-		tables.draw();
-	});
-
-	$('#datalist-filter__actives').on('change', function() {
-		tables.draw();
-	});
-	
-	$.fn.dataTable.ext.search.push(
-		function( settings, data, dataIndex ) {
-			var from = new Date($('.datalist-filter__from').val());
-			var to = new Date($('.datalist-filter__to').val());
-			//var date = new Date(data[3]) || 0;
-
-			if ( ( from == 'Invalid Date' && to == 'Invalid Date' ) ||
-				( date == 'Invalid Date' ) ||
-				( from == 'Invalid Date' && date <= to ) ||
-				( from <= date && to == 'Invalid Date' ) ||
-				( from <= date && date <= to ) )
-			{
-				return true;
-			}
-			return false;
-		}
-	);
-
-	$.fn.dataTable.ext.search.push(
-		function( settings, data, dataIndex ) {
-			var slider = $('#datalist-filter__salary').val().split(';');
-			var min = slider[0];
-			var max = slider[1];
-			var salary = parseFloat(data[4].replace(/[^0-9\.]+/g, ''));
-
-			if ( ( min == undefined && max == undefined ) ||
-				( isNaN(salary) ) ||
-				( min == undefined && salary <= max ) ||
-				( min <= salary && max == undefined ) ||
-				( min <= salary && salary <= max ) )
-			{
-				return true;
-			}
-			return false;
-		}
-	);
-
-	$.fn.dataTable.ext.search.push(
-		function( settings, data, dataIndex ) {
-			var actives = $('#datalist-filter__actives').prop('checked') || false;
-			var status = data[5].toLowerCase();
-
-			if ( ( !actives ) || ( actives && status == 'active' ) )
-			{
-				return true;
-			}
-			return false;
-		}
-	);
-	*/
 });

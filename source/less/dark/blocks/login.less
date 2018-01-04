@@ -14,9 +14,15 @@
     vertical-align: middle;
   }
 
+  &__center {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+
   &__form {
     display: inline-block;
-    max-width: 300px;
+    max-width: 350px;
     width: 90%;
     vertical-align: middle;
     font-size: 14px;
@@ -45,9 +51,18 @@
   }
 
   &__logo {
-    height: 125px;
+    height: 150px;
     margin-bottom: 20px;
-    background: url('../img/rightlogo.png') 50% top no-repeat;
+    background: url('../img/logo.png') 50% top no-repeat;
+    background-size: contain;
+  }
+  
+  &__face_logo {
+    border-radius: 10px;
+    margin-right: 10px;
+    height: 70px;
+    width: 70px;
+    background: url('../img/face_logo.png') 50% top no-repeat;
     background-size: contain;
   }
 }

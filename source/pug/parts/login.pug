@@ -1,6 +1,10 @@
 .login
     form.login__form(action='javascript:void(0);')
-        .login__logo
+        //- .login__logo
+        .volibot-logo.login__center
+            .login__center
+                .login__face_logo
+            include ../../img/logo.svg
         .form-group
             input.form-control#login__hostname(type='text', placeholder='IP Address / Hostname', name='hostname')
         .form-group
@@ -8,6 +12,6 @@
         .form-group.login__action
             .checkbox.login__remember
                 input#login__remember(type='checkbox', name='remember')
-                label(for='login__remember') Remember
+                label(for='login__remember') Remember IP Address / Hostname
             .login__submit
                 button.btn.btn-default(type='submit') Connect

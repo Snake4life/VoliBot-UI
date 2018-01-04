@@ -1,36 +1,52 @@
 nav.navbar.navbar-static-top.header-navbar
     .header-navbar-mobile
         .header-navbar-mobile__menu
-            button.btn(type="button")
-                i.fa.fa-bars
+            //- As you can see below there is an invisible ul with a single li in it.
+            //- When a dropdown item is clicked, Bootstrap adds the "active" class to it.
+            //- If we do not wrap the dropdown in ul li that "active" tag is never removed,
+            //- leading to every dropdown item only working once and then getting stuck
+            //- in the "active" state. This awkward ul li "wrapper" fixes this,
+            //- and to be honest I have no idea why.
+            
+            //- If you want to fix this please go ahead, I wish you good luck.
+            //- If you fail, feel free to update the time counter below.
+            
+            //- Time spent trying to fix this issue: ~2h45m
+            
+            ul.list-unstyled
+                li.dropdown
+                    a.btn.dropdown-toggle(href='', data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false")
+                        i.fa.fa-bars
+                    ul.dropdown-menu(role="menu")
+                        li
+                            a(data-toggle="tab", href="#Dashboard") Dashboard
+                        li
+                            a(data-toggle="tab", href="#Accounts") Accounts
+                        li
+                            a(data-toggle="tab", href="#Sessions") Running Sessions
         .header-navbar-mobile__title
             span= page
-        .header-navbar-mobile__settings.dropdown
-                a.btn.dropdown-toggle(href='', data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false")
-                    i.fa.fa-power-off
-                ul.dropdown-menu.dropdown-menu-right
-                    li
-                        a(href="#") Log Out
-                        a(href="/quit") Shut Down
+        .header-navbar-mobile__settings.navbar__logout
+            a.btn
+                i.fa.fa-power-off
     .navbar-header
         a.navbar-brand(href="index.html")
             .logo.text-nowrap
                 .logo__img
                     i.fa.fa-chevron-right
                 span.logo__text VoliBot
-
     .topnavbar
         ul.nav.navbar-nav.navbar-left
-            li(class=page=='Dashboard' ? 'active' : '' data-toggle="tab")
+            li.active
                 a(data-toggle="tab", href="#Dashboard")
                     span Dashboard
-            li(class=page=='Account')
+            li
                 a(data-toggle="tab", href="#Accounts")
                     span Accounts
-            li(class=page=='Running Sessions')
+            li
                 a(data-toggle="tab", href="#Sessions")
                     span Running Sessions
         ul.userbar.nav.navbar-nav
             li.dropdown
-                a.userbar__settings#navbar__logout
+                a.userbar__settings.navbar__logout
                     i.fa.fa-power-off

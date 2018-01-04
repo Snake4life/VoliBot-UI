@@ -1,6 +1,15 @@
+/* global $ */     // jQuery
+/* global Chart */ // Chart.js
+
 var wscallbacks = [];
 var socket;
+var levelsChart = initializeChart();
 var initialized = false;
+
+function shutdown(){
+	if (socket.readyState == socket.CLOSED || socket.readyState == socket.CLOSING) return;
+	socket.close();
+}
 
 function send(request, data, callback){
 	var id = randomId();
@@ -120,9 +129,8 @@ function initializeVoliBot(hostname, port, onOpen, onClose){
 		return;
 	}
 	
-	initialized = true;
-	levelsChart = initializeChart();
 	socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
+	initialized = true;
 	
 	socket.onopen = function (){
 		wscallbacks["LoggingOut"] = function(){ send("RequestInstanceList", ""); };
@@ -136,9 +144,14 @@ function initializeVoliBot(hostname, port, onOpen, onClose){
 		send("RequestInstanceList", "");
 	}
 
+	socket.onerror = function(error){
+		console.error(error);
+	}
+
 	socket.onclose = function (){
 		wscallbacks = [];
-		if ($.isFunction(onClose)) onOpen();
+		initialized = false;
+		if ($.isFunction(onClose)) onClose();
 	}
 
 	socket.onmessage = function (event) {
@@ -148,7 +161,7 @@ function initializeVoliBot(hostname, port, onOpen, onClose){
 		if (data[0] == MessageType.EVENT && wscallbacks[data[1]] != null) wscallbacks[data[1]](data);
 	}
 
-	MessageType = {
+	var MessageType = {
 		REQUEST: 10,  // interface to server [10, "RandomID" ,"RequestName", {requestdata}]
 		RESPONSE_SUCCESS: 20, // srv 2 intfc [20, "RandomID", {resultdata}]
 		RESPONSE_ERROR: 30, // srv 2 intfc [30, "RandomID", "error message"]
@@ -166,4 +179,5 @@ function requestInstanceLogout(id, callback){
 module.exports = {
 	requestInstanceLogout: requestInstanceLogout,
 	initialize: initializeVoliBot,
+	shutdown: shutdown,
 }
