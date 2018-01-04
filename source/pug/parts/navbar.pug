@@ -18,11 +18,11 @@ nav.navbar.navbar-static-top.header-navbar
                     a.btn.dropdown-toggle(href='', data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false")
                         i.fa.fa-bars
                     ul.dropdown-menu(role="menu")
-                        li
+                        li.top-navbar-item.active
                             a(data-toggle="tab", href="#Dashboard") Dashboard
-                        li
+                        li.top-navbar-item
                             a(data-toggle="tab", href="#Accounts") Accounts
-                        li
+                        li.top-navbar-item
                             a(data-toggle="tab", href="#Sessions") Running Sessions
         .header-navbar-mobile__title
             span= page
@@ -37,13 +37,13 @@ nav.navbar.navbar-static-top.header-navbar
                 span.logo__text VoliBot
     .topnavbar
         ul.nav.navbar-nav.navbar-left
-            li.active
+            li.top-navbar-item.active
                 a(data-toggle="tab", href="#Dashboard")
                     span Dashboard
-            li
+            li.top-navbar-item
                 a(data-toggle="tab", href="#Accounts")
                     span Accounts
-            li
+            li.top-navbar-item
                 a(data-toggle="tab", href="#Sessions")
                     span Running Sessions
         ul.userbar.nav.navbar-nav

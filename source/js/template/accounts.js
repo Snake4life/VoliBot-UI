@@ -8,8 +8,8 @@ $(document).ready(function() {
 	$.getJSON('https://ddragon.leagueoflegends.com/api/versions.json', data => {
 		lolVersion = data[0];
 	});
-
-	$('#AddAccount').submit(function(ev) {
+	
+	$('.products-new').submit(function(ev) {
 		swal({
 			title: 'Error!',
 			text: 'Do you want to continue',
@@ -18,11 +18,17 @@ $(document).ready(function() {
 		});
 		return false;
 	});
+	
+	$('#OpenAccountDetailed').click(() => {
+		// Removes 'active' from all top-navbar-items.
+		// If we don't do this it's not possible to go
+		// back to #Accounts from #AccountDetailed.
+		
+		$('.top-navbar-item').removeClass('active');
+	});
 
 	$('.input-daterange').datepicker();
-
-	//var slider = $(".slider").data("ionRangeSlider");
-
+	
 	// Table tab count update
 	function tabInfo(table) {
 		var id = $(table).closest('.tab-pane').attr('id'),
@@ -44,11 +50,11 @@ $(document).ready(function() {
 		product.find('.products-preview__name').text(summoner.displayName).attr('title', summoner.displayName);
 		product.find('.products-preview__blue_essence').text(wallet.ip).attr('title', wallet.ip);
 		product.find('.products-preview__riot_points').text(wallet.rp).attr('title', wallet.rp);
+		product.find('#XpBar').text(summoner.xpSinceLastLevel + "/" + (summoner.xpSinceLastLevel + summoner.xpUntilNextLevel) + " XP").width(summoner.percentCompleteForNextLevel + "%");
 		
 		//product.find('.products-preview__date').text(data[3]).attr('title', data[3]);
 		//product.find('.products-preview__type').text(data[7]).attr('title', data[7]);
 		//product.find('.products-preview__status').text(data[5]).attr('title', data[5]);
-
 
 		// Remove any previous handlers before assigning one, or we'll get one more every time a client is selected.
 		product.find('.products-preview__logout').off('click');
@@ -56,9 +62,7 @@ $(document).ready(function() {
 			swal({
 				title: 'Logging out...',
 				text: summoner.displayName,
-				onOpen: () => {
-					swal.showLoading()
-				},
+				onOpen: swal.showLoading,
 				allowOutsideClick: false,
 				allowEscapeKey: false,
 				allowEnterKey: false,
@@ -83,12 +87,6 @@ $(document).ready(function() {
 		product.find('.products-preview__icon div')
 			   .css('background-image',
 			   		'url(http://ddragon.leagueoflegends.com/cdn/' + lolVersion + '/img/profileicon/' + summoner.profileIconId + '.png)');
-		
-		$(".slider").data("ionRangeSlider").update({
-    		min: 0,
-    		max: summoner.xpSinceLastLevel + summoner.xpUntilNextLevel,
-    		from: summoner.xpSinceLastLevel,
-		});
 		
 		var chartData = JSON.parse('['+$(data[6]).text()+']');
 		product.find('.products-preview__stat').sparkline(

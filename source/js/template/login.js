@@ -71,9 +71,7 @@ $(document).ready(function() {
 			swal({
 				title: 'Connecting to VoliBot',
 				type: 'info',
-				onOpen: () => {
-					swal.showLoading();
-				},
+				onOpen: swal.showLoading,
 				allowOutsideClick: false,
 				allowEscapeKey: false,
 				allowEnterKey: false,
@@ -134,11 +132,10 @@ $(document).ready(function() {
 				title: 'Failed to connect',
 				text: 'Check the IP Address / Hostname and make sure that VoliBot is up and running',
 				type: 'error',
-				onOpen: () => {
-					// In extreme cases (opening a Websocket throws an exception) this modal shows before onOpen on the "Connecting" modal is called.
-					// If that happens, we get an infinite loading animation. By calling hide here we can prevent that.
-					swal.hideLoading();
-				},
+				
+				// In extreme cases (opening a Websocket throws an exception) this modal shows before onOpen on the "Connecting" modal is called.
+				// If that happens, we get an infinite loading animation. By calling hide here we can prevent that.
+				onOpen: swal.hideLoading
 			});
 		}
 		

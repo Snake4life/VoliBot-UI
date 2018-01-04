@@ -5,18 +5,18 @@
                 .products-preview.datalist-preview
                     .products-preview__cont
                         .products-preview__name(title='Name') No client selected
-                        .products-preview__data
+                        .products-preview__data(style="position: relative;")
                             .products-preview__icon
                                 div(style='')
-                            .products-preview__info
-                                .products-preview__edit
-                                    .btn-group.mr-2
-                                        button.btn.btn-danger.products-preview__logout(type="button") Logout
-                                        button.btn.btn-danger#preview__edit(type="button") Edit
+                            .products-preview__info(style="border-bottom-width: 0px;")
                                 .products-preview__type Position
+                                .products-preview__edit
+                                    .btn-group(style="position: absolute; bottom: 0;")
+                                        button.btn.btn-danger.products-preview__logout(type="button") Logout
+                                        button.btn.btn-danger#OpenAccountDetailed(type="button", data-toggle="tab", href="#AccountDetailed") Details
                         .products-preview__props
                             .progress
-                                .progress-bar.progress-bar-success(style="width: 40%") 40 / 100 XP
+                                .progress-bar.progress-bar-success#XpBar(style="width: 0%; white-space:nowrap;") 0/0 XP
                             .products-preview__prop(title='Blue Essence')
                                 i.fa
                                     img(src="/img/BE_icon.svg", style="height: 20px; width: auto;")
@@ -82,49 +82,100 @@
                                         | &nbsp;New
                             .tab-content
                                 .tab-pane#new(role="tabpanel")
-                                    form.form.products-new
+                                    form.form.products-new(action="javascript:void(0);")
                                         .container-fluid
                                             .row
-                                                .col-md-8
-                                                    .row
-                                                        .col-md-6
-                                                            .form-group
-                                                                .input-group
-                                                                    .input-group-addon
-                                                                        i.fa.fa-cube
-                                                                    input.form-control(type="text", placeholder="Title")
-                                                            .form-group
-                                                                .input-group
-                                                                    .input-group-addon
-                                                                        i.fa.fa-folder
-                                                                    select.selectpicker(placeholder="Type")
-                                                                        option(value="idle") Brand
-                                                                        option(value="leveling") Digital
-                                                                        option(value="finished") Affilate
-                                                        .col-md-6
-                                                            .form-group
-                                                                .input-group
-                                                                    .input-group-addon
-                                                                        i.fa.fa-usd
-                                                                    input.form-control(type="text", placeholder="Price")
-                                                            .form-group
-                                                                .input-group
-                                                                    .input-group-addon
-                                                                        i.fa.fa-heartbeat
-                                                                    select.selectpicker(placeholder="Status")
-                                                                        option(value="customer") Active
-                                                                        option(value="manager") Confirmed
-                                                                        option(value="admin") Blocked
-                                                    .row
-                                                        .col-md-12
-                                                            .form-group
-                                                                textarea.form-control(rows='3', placeholder='Note')
-                                                .col-md-4
-                                                    .fileupload
-                                                        label
-                                                            .fa.fa-image
-                                                            input(type='file')
-                                        button.btn.btn-success#AddAccount Save
+                                                .col-md-6
+                                                    .form-group
+                                                        .input-group
+                                                            .input-group-addon
+                                                                i.fa.fa-user
+                                                            input.form-control(type="text", placeholder="Username")
+                                                    .form-group
+                                                        .input-group
+                                                            .input-group-addon
+                                                                i.fa.fa-unlock-alt
+                                                            input.form-control(type="password", placeholder="Password")
+                                                .col-md-6
+                                                    .form-group
+                                                        .input-group
+                                                            .input-group-addon
+                                                                i.fa.fa-globe
+                                                            select.selectpicker(placeholder="Server")
+                                                                option(value="EUNE") Europe North East (EUNE)
+                                                                option(value="EUW") Europe West (EUW)
+                                                                option(value="JP") Japan (JP)
+                                                                option(value="LA1") Latin North (LAN)
+                                                                option(value="LA2") Latin South (LAS)
+                                                                option(value="NA") North America (NA)
+                                                                option(value="OC1") Oceania (OCE)
+                                                                option(value="RU") Russia (RU)
+                                                                option(value="TR") Turkey (TR)
+                                                    .form-group
+                                                        .input-group
+                                                            .input-group-addon
+                                                                i.fa.fa-gamepad
+                                                            select.selectpicker(placeholder="Status")
+                                                                optgroup(label="Butcher's Bridge")
+                                                                    option(value="100") 5v5 ARAM
+                                                                    
+                                                                optgroup(label="Cosmic Ruins")
+                                                                    option(value="610") Dark Star: Singularity
+                                                                    
+                                                                optgroup(label="Crystal Scar")
+                                                                    option(value="910") Ascension
+                                                                    option(value="317") Definitely Not Dominion
+                                                                    
+                                                                optgroup(label="Howling Abyss")
+                                                                    option(value="72") 1v1 Snowdown Showdown
+                                                                    option(value="73") 2v2 Snowdown Showdown
+                                                                    option(value="450", selected) 5v5 ARAM
+                                                                    option(value="920") Legend of the Poro King
+                                                                    
+                                                                optgroup(label="Overcharge")
+                                                                    option(value="1000") PROJECT: Hunters
+                                                                    
+                                                                optgroup(label="Summoner's Rift")
+                                                                    option(value="400") 5v5 Draft Pick
+                                                                    option(value="420") 5v5 Ranked Solo
+                                                                    option(value="430") 5v5 Blind Pick
+                                                                    option(value="440") 5v5 Ranked Flex
+                                                                    option(value="75") 6v6 Hexakill
+                                                                    option(value="325") All Random
+                                                                    option(value="900") ARURF
+                                                                    option(value="313") Black Market Brawlers
+                                                                    option(value="600") Blood Hunt Assassin
+                                                                    option(value="830") Co-op vs. AI Intro Bot
+                                                                    option(value="840") Co-op vs. AI Beginner Bot
+                                                                    option(value="850") Co-op vs. AI Intermediate Bot
+                                                                    option(value="83") Co-op vs. AI Ultra Rapid Fire
+                                                                    option(value="960") Doom Bots Standard
+                                                                    option(value="950") Doom Bots Voting
+                                                                    option(value="78") Mirrored One for All
+                                                                    option(value="310") Nemesis
+                                                                    option(value="940") Nexus Siege
+                                                                    option(value="70") One for All
+                                                                    option(value="76") Ultra Rapid Fire
+                                                                    option(value="1010") Snow ARURF
+                                                                
+                                                                optgroup(label="Twisted Treeline")
+                                                                    option(value="460") 3v3 Blind Pick
+                                                                    option(value="470") 3v3 Ranked Flex
+                                                                    option(value="98") 6v6 Hexakill
+                                                                    option(value="800") Co-op vs. AI Intermediate Bot
+                                                                    option(value="810") Co-op vs. AI Intro Bot
+                                                                    option(value="820") Co-op vs. AI Beginner Bot
+                                                                    
+                                                                optgroup(label="Valoran City Park")
+                                                                    option(value="980") Star Guardian Invasion: Normal
+                                                                    option(value="990") Star Guardian Invasion: Onslaught
+                                            .row
+                                                .col-md-12
+                                                    .form-group
+                                                        textarea.form-control(rows='3', placeholder='Note')
+                                            .row
+                                                .col-md-12
+                                                    button.btn.btn-success#AddAccount Save
                                 .tab-pane.active#idle(role="tabpanel")
                                     .scrollable.scrollbar-macosx
                                         .container-fluid
