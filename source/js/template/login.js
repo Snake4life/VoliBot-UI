@@ -7,14 +7,14 @@ var swal = require('sweetalert2');
 var pageUnloading = false;
 window.addEventListener("beforeunload", function (event) {
 	pageUnloading = true;
-	
+
 	anime({
 		targets: ['#MainView', '#LoginView'],
 		opacity: 0,
 		duration: 125,
 		easing: 'easeInOutSine'
 	});
-	
+
     swal({
     	title: 'Goodbye!',
     	type: 'info',
@@ -30,7 +30,7 @@ window.addEventListener("beforeunload", function (event) {
 $(document).ready(function() {
 	$('#login__hostname').val(window.localStorage.getItem("login__hostname"));
 	$('#login__remember').prop("checked", window.localStorage.getItem("login__remember"));
-	
+
 	anime.timeline().add([{
 		targets: '#LoginView',
 		translateY: '0%',
@@ -54,11 +54,11 @@ $(document).ready(function() {
 
 	$('.login__form').submit(function(ev){
 		var hostname = $('#login__hostname').val().trim();
-		var password = $('#login__password').val();
+		var password = $('#login__password').val(); // Not used, add to allow opening ports to the public?
 		var remember = $('#login__remember').is(":checked");
-		
+
 		$('#login__hostname').val(hostname);
-		
+
 		if (remember){
 			window.localStorage.setItem("login__hostname", hostname);
 			window.localStorage.setItem("login__remember", remember);
@@ -66,7 +66,7 @@ $(document).ready(function() {
 			window.localStorage.removeItem("login__hostname");
 			window.localStorage.removeItem("login__remember");
 		}
-		
+
 		try{
 			swal({
 				title: 'Connecting to VoliBot',
@@ -84,9 +84,9 @@ $(document).ready(function() {
 	});
 
 	$('#hostname').val(window.location.hostname);
-	
+
 	var connected = false;
-	
+
 	function onOpen(){
 		connected = true;
 		swal({
@@ -96,7 +96,7 @@ $(document).ready(function() {
 			showConfirmButton: false,
 			timer: 1000
 		});
-		
+
 		anime.timeline().add([{
 			targets: '#LoginView',
 			translateY: '-110%',
@@ -110,7 +110,7 @@ $(document).ready(function() {
 			offset: '-=750'
 		}]);
 	}
-	
+
 	function onClose(){
 		if (pageUnloading) return;
 		if (connected){
@@ -132,13 +132,13 @@ $(document).ready(function() {
 				title: 'Failed to connect',
 				text: 'Check the IP Address / Hostname and make sure that VoliBot is up and running',
 				type: 'error',
-				
+
 				// In extreme cases (opening a Websocket throws an exception) this modal shows before onOpen on the "Connecting" modal is called.
 				// If that happens, we get an infinite loading animation. By calling hide here we can prevent that.
 				onOpen: swal.hideLoading
 			});
 		}
-		
+
 		connected = false;
 	}
 });

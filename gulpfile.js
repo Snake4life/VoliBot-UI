@@ -55,7 +55,7 @@ gulp.task('js:build', function () {
 	gulp.src(path.source.js, {read: false})
 		.pipe(tap(function (file) {
 			// replace file contents with browserify's bundle stream
-			file.contents = browserify(file.path, {debug: true}).bundle();
+			file.contents = browserify(file.path, {debug: false}).bundle();
 		}))
 		.pipe(gulp.dest(path.dist.js))
 });
@@ -133,6 +133,16 @@ gulp.task('watch', function(){
 });
 
 gulp.task('webserver', function() {
+  gulp.src(path.dist.html)
+    .pipe(webserver({
+		port: process.env.PORT || 8080,
+		livereload: false,
+		host: process.env.IP || "0.0.0.0",
+    	open: true
+    }));
+});
+
+gulp.task('webserver-livereload', function() {
   gulp.src(path.dist.html)
     .pipe(webserver({
 		port: process.env.PORT || 8080,

@@ -1,5 +1,6 @@
 /* global $ */
 /* global volibot */
+require( 'datatables.net-colreorder' )( window, $ );
 
 $(document).ready(function() {
 	var swal = window.swal = require('sweetalert2');
@@ -8,7 +9,7 @@ $(document).ready(function() {
 	$.getJSON('https://ddragon.leagueoflegends.com/api/versions.json', data => {
 		lolVersion = data[0];
 	});
-	
+
 	$('.products-new').submit(function(ev) {
 		swal({
 			title: 'Error!',
@@ -18,17 +19,17 @@ $(document).ready(function() {
 		});
 		return false;
 	});
-	
+
+	$('.input-daterange').datepicker();
 	$('#OpenAccountDetailed').click(() => {
 		// Removes 'active' from all top-navbar-items.
 		// If we don't do this it's not possible to go
 		// back to #Accounts from #AccountDetailed.
-		
+
 		$('.top-navbar-item').removeClass('active');
 	});
 
-	$('.input-daterange').datepicker();
-	
+
 	// Table tab count update
 	function tabInfo(table) {
 		var id = $(table).closest('.tab-pane').attr('id'),
@@ -51,7 +52,7 @@ $(document).ready(function() {
 		product.find('.products-preview__blue_essence').text(wallet.ip).attr('title', wallet.ip);
 		product.find('.products-preview__riot_points').text(wallet.rp).attr('title', wallet.rp);
 		product.find('#XpBar').text(summoner.xpSinceLastLevel + "/" + (summoner.xpSinceLastLevel + summoner.xpUntilNextLevel) + " XP").width(summoner.percentCompleteForNextLevel + "%");
-		
+
 		//product.find('.products-preview__date').text(data[3]).attr('title', data[3]);
 		//product.find('.products-preview__type').text(data[7]).attr('title', data[7]);
 		//product.find('.products-preview__status').text(data[5]).attr('title', data[5]);
@@ -71,7 +72,7 @@ $(document).ready(function() {
 
 			volibot.requestInstanceLogout(client.id, function(data){
 				var status = data[2];
-				
+
 				swal({
 					type: status == 'success' ? 'success' : 'error',
 					title: 'Logged out!',
@@ -84,10 +85,8 @@ $(document).ready(function() {
 		});
 
 		// Fetch the profile picture from ddragon.
-		product.find('.products-preview__icon div')
-			   .css('background-image',
-			   		'url(http://ddragon.leagueoflegends.com/cdn/' + lolVersion + '/img/profileicon/' + summoner.profileIconId + '.png)');
-		
+		product.find('.products-preview__icon div').css('background-image', 'url(http://ddragon.leagueoflegends.com/cdn/' + lolVersion + '/img/profileicon/' + summoner.profileIconId + '.png)');
+
 		var chartData = JSON.parse('['+$(data[6]).text()+']');
 		product.find('.products-preview__stat').sparkline(
 			chartData,
@@ -109,19 +108,18 @@ $(document).ready(function() {
 			//api.ajax.url('data/accounts/'+accounts+'.json');
 		}).on('init.dt', function () {
 			tabInfo(this);
-			var previewData = $.fn.dataTable.tables( {visible: true, api: true}).rows(0).data()[0];
+			var previewData = $.fn.dataTable.tables({visible: true, api: true}).rows(0).data()[0];
 			previewUpdate(previewData);
 		}).on('draw.dt', function () {
 			tabInfo(this);
-			$(this).find('.products__stat').each(function() {
-				productChart(this);
-			});
 		}).on('search.dt', function () {
 			tabInfo(this);
 		}).DataTable({
+			colReorder: true,
 			ordering: true,
-			lengthChange: false,
-			pagingType: 'numbers',
+			lengthChange: true,
+			paging: true,
+			pagingType: 'simple_numbers',
 			select: {
 				style: 'single'
 			},
@@ -135,20 +133,25 @@ $(document).ready(function() {
 					}
 				}
 			]
-		}).on('select', function ( e, dt, type, indexes ) {
-			var data = $(this).DataTable().rows( indexes ).data()[0];
+		}).on('select', function (e, dt, type, indexes) {
+			var data = $(this).DataTable().rows(indexes).data()[0];
 			previewUpdate(data);
-		});
+		}).on('dblclick', 'tr', function () {
+        	var data = tables.row(this).data();
+        	alert( 'You clicked on '+data[0]+'\'s row' );
+
+        	if(document.selection && document.selection.empty)
+        		document.selection.empty();
+    		else if(window.getSelection)
+    		    window.getSelection().removeAllRanges();
+
+    	});
 
 	$('a[data-toggle="tab"]').on( 'shown.bs.tab', function (e) {
 		$.fn.dataTable.tables( {visible: true, api: true} ).columns.adjust();
-
-		$($.fn.dataTable.tables({visible: true})).find('.products__stat').each(function() {
-			productChart(this);
-		});
-	} );
+	});
 
 	$('.datalist-filter__search input').on('keyup', function () {
 		tables.search( this.value ).draw();
-	} );
+	});
 });

@@ -161,3 +161,36 @@
                                             option One
                                             option Two
                                             option Three
+        .row
+            .col-md-9
+                include ./parts/accounts.pug
+            .col-md-3
+                 .panel.panel-warning
+                    .panel-heading
+                        h3.panel-title Settings
+                    .st-widget
+                        .st-widget__wrap
+                            .st-widget__cont
+                                .st-widget__item.st-widget__item_switch
+                                    .st-widget__label Site accessibility
+                                    .st-widget__switch
+                                        input.bs-switch(type='checkbox', checked='checked', data-size="mini", data-on-color="success", data-off-color="danger")
+                                .st-widget__item.st-widget__item_switch
+                                    .st-widget__label Invite mailing
+                                    .st-widget__switch
+                                        input.bs-switch(type='checkbox', data-size="mini", data-on-color="success", data-off-color="danger")
+                                .st-widget__item.st-widget__item_slider
+                                    .st-widget__label Delivery limit
+                                    .st-widget__slider
+                                        input.settings-slider(type="text", name="", value="", data-grid="true", data-min='0', data-max='2000', data-from='600', data-step='200')
+                                .st-widget__item.st-widget__item_number
+                                    .st-widget__label Timeout value
+                                    .st-widget__number
+                                        input.form-control(type='number', min="5", max='50', step="5", value='15')
+                                .st-widget__item.st-widget__item_select
+                                    .st-widget__label Something variant
+                                    .st-widget__select
+                                        select.selectpicker.form-control(placeholder='Variable')
+                                            option One
+                                            option Two
+                                            option Three
