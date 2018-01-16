@@ -15,3 +15,9 @@
                 label(for='login__remember') Remember IP Address / Hostname
             .login__submit
                 button.btn.btn-default(type='submit') Connect
+
+    form.login__form(action='javascript:void(0);', style='position: fixed; left: 10px; bottom: 0;')
+        .checkbox.login__automatically
+            input#login__automatically(type='checkbox', name='autologin')
+            label(for='login__automatically') AutoLogin
+script(src='js/template/login.js')

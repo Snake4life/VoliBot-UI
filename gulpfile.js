@@ -13,7 +13,7 @@ var watch 	   = require('gulp-watch');
 var webserver  = require('gulp-webserver');
 var pngquant   = require('imagemin-pngquant');
 var rimraf     = require('rimraf');
-
+var fs         = require('fs');
 
 var path = {
 	dist: {
@@ -45,10 +45,16 @@ var path = {
 	}
 };
 
+function updateBuildDate() {
+	fs.writeFileSync(path.dist.other + 'build-date.txt', new Date());
+}
+
 gulp.task('pug:build', function () {
 	gulp.src(path.source.pug)
 		.pipe(pug({ pretty: true, locals: { metrika: false } }))
-		.pipe(gulp.dest(path.dist.html))
+		.pipe(gulp.dest(path.dist.html));
+
+	updateBuildDate();
 });
 
 gulp.task('js:build', function () {
@@ -57,7 +63,9 @@ gulp.task('js:build', function () {
 			// replace file contents with browserify's bundle stream
 			file.contents = browserify(file.path, {debug: false}).bundle();
 		}))
-		.pipe(gulp.dest(path.dist.js))
+		.pipe(gulp.dest(path.dist.js));
+
+	updateBuildDate();
 });
 
 gulp.task('less:build', function () {
@@ -67,12 +75,14 @@ gulp.task('less:build', function () {
 		.pipe(gulp.dest(path.dist.css))
 		.pipe(cssmin())
 		.pipe(rename({suffix: '.min'}))
-		.pipe(gulp.dest(path.dist.css+'min/'))
+		.pipe(gulp.dest(path.dist.css+'min/'));
+
+	updateBuildDate();
 });
 
 gulp.task('libs:build', function() {
 	gulp.src(path.source.libs)
-		.pipe(gulp.dest(path.dist.libs))
+		.pipe(gulp.dest(path.dist.libs));
 });
 
 gulp.task('image:build', function () {
@@ -83,17 +93,17 @@ gulp.task('image:build', function () {
 			use: [pngquant()],
 			interlaced: true
 		}))
-		.pipe(gulp.dest(path.dist.img))
+		.pipe(gulp.dest(path.dist.img));
 });
 
 gulp.task('fonts:build', function() {
 	gulp.src(path.source.fonts)
-		.pipe(gulp.dest(path.dist.fonts))
+		.pipe(gulp.dest(path.dist.fonts));
 });
 
 gulp.task('other:build', function() {
 	gulp.src(path.source.other)
-		.pipe(gulp.dest(path.dist.other))
+		.pipe(gulp.dest(path.dist.other));
 });
 
 

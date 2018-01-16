@@ -1,0 +1,52 @@
+.container-fluid.half-padding
+    .datalist.page.page_products.products
+        .row
+            .col-lg-9.col-md-9.col-sm-12.col-xs-12
+                .panel.panel-info
+                    .panel-heading
+                        h3.panel-title Accounts
+                    .panel-body
+                        p You have #[span#account_count] accounts.
+                        form.datalist-filter
+                            div
+                                span.input-group.datalist-filter__search
+                                    input.form-control(type="text", placeholder="Filter Accounts")
+                                    span.input-group-btn
+                                        button.btn.btn-default(type="button", role="button", data-toggle="collapse", data-target="#datalist-filter__detail", aria-controls="users__filter-detail", aria-expanded="false")
+                                            .fa.fa-filter
+                                .collapse#datalist-filter__detail
+                                    .container-fluid.datalist-filter__detail
+                                        .row
+                                            .col-lg-6.col-md-6.col-sm-12.col-xs-12.input-daterange
+                                                .form-group
+                                                    .input-group
+                                                        .input-group-addon
+                                                            i.fa.fa-calendar-minus-o
+                                                        input.form-control.datalist-filter__from(type="text", value="")
+                                                .form-group
+                                                    .input-group
+                                                        .input-group-addon
+                                                            i.fa.fa-calendar-plus-o
+                                                        input.form-control.datalist-filter__to(type="text", value="")
+                                            .col-lg-6.col-md-6.col-sm-12.col-xs-12
+                                                .form-group
+                                                    input.slider#datalist-filter__salary(type="text", name="", value="")
+                                                .form-group
+                                                    .checkbox.checkbox-danger
+                                                        input#datalist-filter__actives(type='checkbox')
+                                                        label(for='datalist-filter__actives') Actives only
+                        .datalist__result
+                            .scrollable.scrollbar-macosx
+                                .container-fluid
+                                    table.datalist__table.table.datatable.display.table-hover(width='100%', data-products='idle')
+                                        thead
+                                            tr
+                                                th.accounts__summoner_summonerLevel Level
+                                                th.accounts__summoner_displayName Summoner Name
+                                                th.accounts__summoner_status Status
+                                                th.accounts__summoner_summonerId Summoner ID
+                                                th.accounts__wallet_ip BE
+                                                th.accounts__wallet_rp RP
+            .col-lg-3.col-md-3.col-sm-12.col-xs-12
+                include ./parts/add_accounts
+script(src='js/template/accounts.js')

@@ -1,144 +1,168 @@
 /* global $ */
 
-var volibot = window.volibot = require('../modules/volibot');
 var anime = require('animejs');
 var swal = require('sweetalert2');
-
+var volibot;
 var pageUnloading = false;
+
+window.show_goodbye = true;
+
 window.addEventListener("beforeunload", function (event) {
 	pageUnloading = true;
 
-	anime({
-		targets: ['#MainView', '#LoginView'],
-		opacity: 0,
-		duration: 125,
-		easing: 'easeInOutSine'
-	});
+	if (window.show_goodbye){
+		anime({
+			targets: ['#MainView', '#LoginView'],
+			opacity: 0,
+			duration: 125,
+			easing: 'easeInOutSine'
+		});
 
-    swal({
-    	title: 'Goodbye!',
-    	type: 'info',
-    	backdrop: false,
-    	showConfirmButton: false,
-    	allowOutsideClick: false,
-    	allowEscapeKey: false,
-    	allowEnterKey: false,
-    	onOpen: swal.hideLoading
-    });
+		swal({
+			title: 'Goodbye!',
+			type: 'info',
+			backdrop: false,
+			showConfirmButton: false,
+			allowOutsideClick: false,
+			allowEscapeKey: false,
+			allowEnterKey: false,
+			onOpen: swal.hideLoading
+		});
+	}
 });
 
 $(document).ready(function() {
+	volibot = window.volibot = require('../modules/volibot');
+
+	$('.login__form').submit(doLogin);
 	$('#login__hostname').val(window.localStorage.getItem("login__hostname"));
-	$('#login__remember').prop("checked", window.localStorage.getItem("login__remember"));
+	$('#login__remember').prop("checked", window.localStorage.getItem("login__hostname"));
+	$('#login__automatically').prop("checked", window.localStorage.getItem("login__automatically"));
+	$('#login__automatically').change(function(){ window.localStorage.setItem("login__automatically",  $('#login__automatically').is(":checked") ? true : "");});
 
-	anime.timeline().add([{
-		targets: '#LoginView',
-		translateY: '0%',
-		duration: 750,
-		delay: 500,
-		easing: 'easeInOutQuart'
-	},{
-		targets: '.volibot-logo>svg>g>path',
-		strokeDashoffset: [anime.setDashoffset, 0],
-		easing: 'easeInOutSine',
-		duration: 750,
-		delay: function(el, i) { return i * 150 },
-		offset: "-=100"
-	},{
-		targets: '.volibot-logo>svg>g',
-		fillOpacity: 1,
-		easing: 'linear',
-		duration: 1000,
-		offset: "+=350"
-	}]);
+	if (window.localStorage.getItem("login__automatically")){
+		doLogin();
+	}else{
+		anime.timeline().add([{
+			targets: '#LoginView',
+			translateY: '0%',
+			duration: 750,
+			delay: 500,
+			easing: 'easeInOutQuart'
+		},{
+			targets: '.volibot-logo>svg>g>path',
+			strokeDashoffset: [anime.setDashoffset, 0],
+			easing: 'easeInOutSine',
+			duration: 500,
+			delay: function(el, i) { return i * 150 },
+			offset: "-=100"
+		},{
+			targets: '.volibot-logo>svg>g',
+			fillOpacity: 1,
+			easing: 'linear',
+			duration: 750,
+			offset: "+=350"
+		}]);
+	}
 
-	$('.login__form').submit(function(ev){
+	function doLogin(){
 		var hostname = $('#login__hostname').val().trim();
-		var password = $('#login__password').val(); // Not used, add to allow opening ports to the public?
+		//var password = $('#login__password').val(); // Not used, add to allow opening ports to the public?
 		var remember = $('#login__remember').is(":checked");
+		var autologin = $('#login__automatically').is(":checked");
 
 		$('#login__hostname').val(hostname);
 
-		if (remember){
+		if (remember)
 			window.localStorage.setItem("login__hostname", hostname);
-			window.localStorage.setItem("login__remember", remember);
-		}else{
-			window.localStorage.removeItem("login__hostname");
-			window.localStorage.removeItem("login__remember");
-		}
+		else
+			window.localStorage.setItem("login__hostname", "");
+
+		window.localStorage.setItem("login__automatically", autologin ? true : "");
 
 		try{
-			swal({
-				title: 'Connecting to VoliBot',
-				type: 'info',
-				onOpen: swal.showLoading,
-				allowOutsideClick: false,
-				allowEscapeKey: false,
-				allowEnterKey: false,
-				showConfirmButton: false
-			});
-			volibot.initialize(hostname, 8000, onOpen, onClose);
-		}catch(e){
-			onClose();
-		}
-	});
+			// If connecting takes more than 100ms, do not show the "connecting" modal.
+			// This hides it if you are immediately connected, but shows it if there's any issues or delays.
+			var loadingTimeout = setTimeout(function() {
+				swal({
+					title: 'Connecting to VoliBot',
+					type: 'info',
+					onOpen: swal.showLoading,
+					allowOutsideClick: false,
+					allowEscapeKey: false,
+					allowEnterKey: false,
+					showConfirmButton: false
+				});
+			}, 100);
 
-	$('#hostname').val(window.location.hostname);
+			volibot.initialize(hostname, 8000, function(){
+				clearTimeout(loadingTimeout);
+				onOpen(...arguments);
+			}, function(){
+				clearTimeout(loadingTimeout);
+				onClose(...arguments);
+			});
+		}catch(e){
+			onClose({wasClean: false});
+		}
+	}
 
 	var connected = false;
-
 	function onOpen(){
 		connected = true;
-		swal({
-			title: 'Connnected',
-			text: 'Successfully connected to VoliBot!',
-			type: 'success',
-			showConfirmButton: false,
-			timer: 1000
-		});
+		swal.close();
 
 		anime.timeline().add([{
 			targets: '#LoginView',
 			translateY: '-110%',
-			duration: 1000,
+			duration: 750,
 			easing: 'easeInOutQuart'
 		},{
 			targets: '#MainView',
 			translateY: '0%',
-			duration: 1000,
+			duration: 750,
 			easing: 'easeInOutQuart',
-			offset: '-=750'
+			offset: '-=650'
 		}]);
 	}
 
-	function onClose(){
+	function onClose(info){
+		//Disconnected: info.code == 1006??
+		//https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
+
+		console.log("Ws closed: ");
+		console.log(info);
+
 		if (pageUnloading) return;
-		if (connected){
-			anime.timeline().add([{
-				targets: '#MainView',
-				translateY: '-110%',
-				duration: 1000,
-				easing: 'easeInOutQuart'
-			},{
-				targets: '#LoginView',
-				translateY: '0%',
-				duration: 1000,
-				easing: 'easeInOutQuart',
-				offset: '-=750'
-			}]);
-			swal("Disconnected", "You have been disconnected from VoliBot", "info");
+
+		anime.timeline().add([{
+			targets: '#MainView',
+			translateY: '210%',
+			duration: 750,
+			easing: 'easeInOutQuart'
+		},{
+			targets: '#LoginView',
+			translateY: '0%',
+			duration: 750,
+			easing: 'easeInOutQuart',
+			offset: '-=650'
+		}]);
+
+		if (!info.wasClean)
+		{
+			if (connected){
+				swal("Disconnected", "You have been disconnected from VoliBot", "info");
+			}else{
+				swal({
+					title: 'Failed to connect',
+					text: 'Check the IP Address / Hostname and make sure that VoliBot is up and running',
+					type: 'error',
+					showConfirmButton: true
+				});
+			}
 		}else{
-			swal({
-				title: 'Failed to connect',
-				text: 'Check the IP Address / Hostname and make sure that VoliBot is up and running',
-				type: 'error',
-
-				// In extreme cases (opening a Websocket throws an exception) this modal shows before onOpen on the "Connecting" modal is called.
-				// If that happens, we get an infinite loading animation. By calling hide here we can prevent that.
-				onOpen: swal.hideLoading
-			});
+			$('#login__automatically').prop('checked', false);
+			window.localStorage.setItem("login__automatically", "");
 		}
-
-		connected = false;
 	}
 });

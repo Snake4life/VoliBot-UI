@@ -1,9 +1,9 @@
 /* global $ */
 /* global volibot */
 require( 'datatables.net-colreorder' )( window, $ );
+var swal = require('sweetalert2');
 
 $(document).ready(function() {
-	var swal = window.swal = require('sweetalert2');
 	var lolVersion;
 
 	$.getJSON('https://ddragon.leagueoflegends.com/api/versions.json', data => {

@@ -1,7 +1,7 @@
 .container-fluid.half-padding
-    .datalist.page.page_products.products.float-right
+    .datalist.pages.page_products.products.float-right
         .row
-            .col-lg-12.col-md-12.col-sm-12.col-xs-12
+            .col-lg-9.col-md-9.col-sm-12.col-xs-12
                 .panel.panel-info
                     .panel-heading
                         h3.panel-title Accounts
@@ -35,125 +35,10 @@
                                                     input#datalist-filter__actives(type='checkbox')
                                                     label(for='datalist-filter__actives') Actives only
                         .datalist__result
-                            ul.nav.nav-tabs(role="tablist")
-                                li.active(role="presentation")
-                                    a(href="#idle",aria-controls="idle", role="tab", data-toggle="tab") Accounts&nbsp;
-                                li(role="presentation")
-                                    a(href="#new",aria-controls="new", role="tab", data-toggle="tab")
-                                        i.fa.fa-plus
-                                        | &nbsp;New
-                            .tab-content
-                                .tab-pane#new(role="tabpanel")
-                                    form.form.products-new(action="javascript:void(0);")
-                                        .container-fluid
-                                            .row
-                                                .col-md-6
-                                                    .form-group
-                                                        .input-group
-                                                            .input-group-addon
-                                                                i.fa.fa-user
-                                                            input.form-control(type="text", placeholder="Username")
-                                                    .form-group
-                                                        .input-group
-                                                            .input-group-addon
-                                                                i.fa.fa-unlock-alt
-                                                            input.form-control(type="password", placeholder="Password")
-                                                .col-md-6
-                                                    .form-group
-                                                        .input-group
-                                                            .input-group-addon
-                                                                i.fa.fa-globe
-                                                            select.selectpicker(placeholder="Server")
-                                                                option(value="EUNE") Europe North East (EUNE)
-                                                                option(value="EUW") Europe West (EUW)
-                                                                option(value="JP") Japan (JP)
-                                                                option(value="LA1") Latin North (LAN)
-                                                                option(value="LA2") Latin South (LAS)
-                                                                option(value="NA") North America (NA)
-                                                                option(value="OC1") Oceania (OCE)
-                                                                option(value="RU") Russia (RU)
-                                                                option(value="TR") Turkey (TR)
-                                                    .form-group
-                                                        .input-group
-                                                            .input-group-addon
-                                                                i.fa.fa-gamepad
-                                                            select.selectpicker(placeholder="Status")
-                                                                optgroup(label="Butcher's Bridge")
-                                                                    option(value="100") 5v5 ARAM
-
-                                                                optgroup(label="Cosmic Ruins")
-                                                                    option(value="610") Dark Star: Singularity
-
-                                                                optgroup(label="Crystal Scar")
-                                                                    option(value="910") Ascension
-                                                                    option(value="317") Definitely Not Dominion
-
-                                                                optgroup(label="Howling Abyss")
-                                                                    option(value="72") 1v1 Snowdown Showdown
-                                                                    option(value="73") 2v2 Snowdown Showdown
-                                                                    option(value="450", selected) 5v5 ARAM
-                                                                    option(value="920") Legend of the Poro King
-
-                                                                optgroup(label="Overcharge")
-                                                                    option(value="1000") PROJECT: Hunters
-
-                                                                optgroup(label="Summoner's Rift")
-                                                                    option(value="400") 5v5 Draft Pick
-                                                                    option(value="420") 5v5 Ranked Solo
-                                                                    option(value="430") 5v5 Blind Pick
-                                                                    option(value="440") 5v5 Ranked Flex
-                                                                    option(value="75") 6v6 Hexakill
-                                                                    option(value="325") All Random
-                                                                    option(value="900") ARURF
-                                                                    option(value="313") Black Market Brawlers
-                                                                    option(value="600") Blood Hunt Assassin
-                                                                    option(value="830") Co-op vs. AI Intro Bot
-                                                                    option(value="840") Co-op vs. AI Beginner Bot
-                                                                    option(value="850") Co-op vs. AI Intermediate Bot
-                                                                    option(value="83") Co-op vs. AI Ultra Rapid Fire
-                                                                    option(value="960") Doom Bots Standard
-                                                                    option(value="950") Doom Bots Voting
-                                                                    option(value="78") Mirrored One for All
-                                                                    option(value="310") Nemesis
-                                                                    option(value="940") Nexus Siege
-                                                                    option(value="70") One for All
-                                                                    option(value="76") Ultra Rapid Fire
-                                                                    option(value="1010") Snow ARURF
-
-                                                                optgroup(label="Twisted Treeline")
-                                                                    option(value="460") 3v3 Blind Pick
-                                                                    option(value="470") 3v3 Ranked Flex
-                                                                    option(value="98") 6v6 Hexakill
-                                                                    option(value="800") Co-op vs. AI Intermediate Bot
-                                                                    option(value="810") Co-op vs. AI Intro Bot
-                                                                    option(value="820") Co-op vs. AI Beginner Bot
-
-                                                                optgroup(label="Valoran City Park")
-                                                                    option(value="980") Star Guardian Invasion: Normal
-                                                                    option(value="990") Star Guardian Invasion: Onslaught
-                                            .row
-                                                .col-md-12
-                                                    .form-group
-                                                        textarea.form-control(rows='3', placeholder='Note')
-                                            .row
-                                                .col-md-12
-                                                    button.btn.btn-success#AddAccount Save
-                                .tab-pane.active#idle(role="tabpanel")
-                                    .scrollable.scrollbar-macosx
-                                        .container-fluid
-                                            include ./parts/accounts_table.pug
-block css
-    link(href='libs/datatables/css/dataTables.bootstrap.css', rel='stylesheet')
-    link(href='libs/selectize/css/selectize.default.css', rel='stylesheet')
-    link(href='libs/selectize/css/selectize.bootstrap3.css', rel='stylesheet')
-    link(href='libs/bootstrap-datepicker/css/bootstrap-datepicker.min.css', rel='stylesheet')
-    link(href='libs/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css', rel='stylesheet')
-    link(href='libs/bootstrap-select/css/bootstrap-select.min.css', rel='stylesheet')
+                            .scrollable.scrollbar-macosx
+                                .container-fluid
+                                    include ./parts/accounts_table.pug
+            .col-lg-3.col-md-3.col-sm-12.col-xs-12
+                include ./parts/add_accounts.pug
 block js
-    script(src='libs/datatables/js/jquery.dataTables.js')
-    script(src='libs/datatables/js/dataTables.select.js')
-    script(src='libs/datatables/js/dataTables.bootstrap.js')
-    script(src='libs/selectize/js/standalone/selectize.min.js')
-    script(src='libs/bootstrap-datepicker/js/bootstrap-datepicker.min.js')
-    script(src='libs/bootstrap-select/js/bootstrap-select.min.js')
     script(src='js/template/accounts.js')
