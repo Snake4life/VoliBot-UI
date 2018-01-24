@@ -39,33 +39,48 @@ function randomId() {
 function updateUi(data){
 	updateLevelsChart(data);
 	updateAccountsList(data);
+}
 
 function updateLevelsChart(data){
 	var clientData = (data[2].List || []);
+
 	var highestLevelClient = Math.max(Math.max.apply(Math, clientData.map(function(o){
 		if (o == null || o.summoner == null) return -1;
 		return o.summoner.summonerLevel;
 	})), 0);
 
 	var levelsLabels = Array.from(new Array(highestLevelClient),(val,index)=>"Level: " + (index + 1));
-	var levelsValues = new Array(highestLevelClient).fill(0);
+	var idleAccounts = new Array(highestLevelClient).fill(0);
+	var activeAccounts = new Array(highestLevelClient).fill(0);
+	var finishedAccounts = new Array(highestLevelClient).fill(0);
 
 	clientData.forEach(function(client){
 		if (client == null || client.summoner == null) return;
-		levelsValues[parseInt(client.summoner.summonerLevel, 10) - 1]++;
+
+		let i = Math.floor(Math.random() * 6);
+		if (i == 0)
+			idleAccounts[parseInt(client.summoner.summonerLevel, 10) - 1]++;
+		else if (i == 5)
+			finishedAccounts[parseInt(client.summoner.summonerLevel, 10) - 1]++;
+		else
+			activeAccounts[parseInt(client.summoner.summonerLevel, 10) - 1]++;
 	});
 
 	levelsChart.data.labels = levelsLabels;
-	levelsChart.data.datasets[0].data = levelsValues;
+	levelsChart.data.datasets[0].data = idleAccounts;
+	levelsChart.data.datasets[1].data = activeAccounts;
+	levelsChart.data.datasets[2].data = finishedAccounts;
+
 	levelsChart.update({
 		duration: 800,
 		easing: 'easeOutBounce'
 	});
 }
+
 function updateAccountsList(data){
 	var dt = $('.datatable').DataTable();
 	var allClients = data[2].List;
-	var clients = [];
+	let updateClients = [];
 
 	if (allClients == null){
 		dt.clear();
@@ -75,13 +90,13 @@ function updateAccountsList(data){
 
 	allClients.forEach(x => {
 		if (x != null && x.summoner != null)
-			clients.push(x);
+			updateClients.push(x);
 	});
 
-	$("#account_count").text(clients.length);
+	$("#account_count").text(updateClients.length);
 	dt.clear()
 		.rows
-			.add(clients.map(x => [
+			.add(updateClients.map(x => [
 				{'level': x.summoner.summonerLevel, 'percent': x.summoner.percentCompleteForNextLevel},
 
 				x.summoner.displayName,
@@ -95,8 +110,7 @@ function updateAccountsList(data){
 				x
 			]))
 			.draw();
-}
-}
+	}
 
 function initializeChart(){
 	return new Chart($(".ld-widget-main__chart-canvas"), {
@@ -104,10 +118,22 @@ function initializeChart(){
 		data: {
 			labels: [],
 			datasets: [{
-				label: 'Accounts',
+				label: 'Idle Accounts',
 				data: [],
-				backgroundColor: 'rgba(54, 162, 235, 0.2)',
-				borderColor: 'rgba(54, 162, 235, 1)',
+				backgroundColor: 'rgba(254, 212, 42, 0.2)',
+				borderColor: 'rgba(254, 212, 42, 1)',
+				borderWidth: 1
+			},{
+				label: 'Active Accounts',
+				data: [],
+				backgroundColor: 'rgba(30, 89, 217, 0.2)',
+				borderColor: 'rgba(30, 89, 217, 1)',
+				borderWidth: 1
+			},{
+				label: 'Finished Accounts',
+				data: [],
+				backgroundColor: 'rgba(92, 184, 92, 0.2)',
+				borderColor: 'rgba(92, 184, 92, 1)',
 				borderWidth: 1
 			}]
 		},
@@ -125,6 +151,7 @@ function initializeChart(){
 					}
 				}],
 				xAxes: [{
+					stacked: true,
 					ticks: {
 						beginAtZero:true,
 						autoskip: false

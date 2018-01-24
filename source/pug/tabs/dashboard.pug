@@ -4,59 +4,15 @@
              .col-md-9
                 .panel.panel-danger
                     .panel-heading
-                        h3.panel-title Users statistic
+                        h3.panel-title Accounts Per Level
                     .panel-body
                         .ld-widget
                             .ld-widget__cont
-                                .ld-widget-main(style="height:275px")
-                                    .ld-widget-main__title Levels
-                                    .ld-widget-main__chart(style="position: relative; height:250px")
+                                .ld-widget-main(style="height:250px")
+                                    .ld-widget-main__chart(style="position: relative; height:250x")
                                         canvas.ld-widget-main__chart-canvas
              .col-md-3
-                .panel.panel-success
-                    .panel-heading
-                        h3.panel-title Overview
-                    .panel-body
-                        .ov-widget
-                            .ov-widget__list
-                                .ov-widget__item.ov-widget__item_inc
-                                    .ov-widget__value 1,950
-                                    .ov-widget__info
-                                        .ov-widget__title Total users
-                                .ov-widget__item.ov-widget__item_dec
-                                    .ov-widget__value $3,230
-                                    .ov-widget__info
-                                        .ov-widget__title Earnings
-                                        .ov-widget__change
-                                            span $140
-                                            span.fa.fa-level-up
-                                            span.fa.fa-level-down
-                                            span.fa.fa-bolt
-                                            span.fa.fa-thumb-tack
-                                .ov-widget__item.ov-widget__item_warn
-                                    .ov-widget__value 12,450
-                                    .ov-widget__info
-                                        .ov-widget__title Visits
-                                        .ov-widget__change
-                                            span 921
-                                            span.fa.fa-level-up
-                                            span.fa.fa-level-down
-                                            span.fa.fa-bolt
-                                            span.fa.fa-thumb-tack
-                                .ov-widget__item.ov-widget__item_tack
-                                    .ov-widget__value 1,087
-                                    .ov-widget__info
-                                        .ov-widget__title Orders
-                                        .ov-widget__change
-                                            span
-                                            span.fa.fa-level-up
-                                            span.fa.fa-level-down
-                                            span.fa.fa-bolt
-                                            span.fa.fa-thumb-tack
-                                .ov-widget__bar
-                                    span Conquer the world
-                                    .progress
-                                        .progress-bar.progress-bar-info(role="progressbar", aria-valuenow="85", aria-valuemin="0", aria-valuemax="100", style="width: 85%")
+                include ./parts/accounts_overview
         .row
             .col-md-5
                 .panel.panel-info
