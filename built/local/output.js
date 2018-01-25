@@ -4,7 +4,7 @@
 // REWRITE THE ENTIRE THING TO TS
 // NO MATTER HOW LONG IT'LL TAKE
 // IT'LL BE WORTH IT TO USE A SANE LANGUAGE
-var VoliBot = (function () {
+var VoliBot = /** @class */ (function () {
     function VoliBot(hostname, port, onOpen, onClose) {
         var self = this;
         // Class variables
@@ -57,7 +57,7 @@ var VoliBot = (function () {
         this.wscallbacks[id] = function () {
             var data = [];
             for (var _i = 0; _i < arguments.length; _i++) {
-                data[_i - 0] = arguments[_i];
+                data[_i] = arguments[_i];
             }
             delete this.wscallbacks[id];
             if ($.isFunction(callback))

@@ -14,11 +14,13 @@ var webserver  = require('gulp-webserver');
 var pngquant   = require('imagemin-pngquant');
 var rimraf     = require('rimraf');
 var fs         = require('fs');
+var ts         = require('gulp-typescript');
 
 var path = {
 	dist: {
 		html: 'dist/',
 		js: 'dist/js/',
+		ts: 'dist/ts/',
 		css: 'dist/css/',
 		img: 'dist/img/',
 		fonts: 'dist/fonts/',
@@ -28,6 +30,7 @@ var path = {
 	source: {
 		pug: 'source/pug/*.pug',
 		js: 'source/js/**/*.js',
+		ts: 'source/js/**/*.ts',
 		less: 'source/less/*.less',
 		img: 'source/img/**/*.*',
 		fonts: 'source/fonts/**/*.*',
@@ -37,6 +40,7 @@ var path = {
 	watch: {
 		pug: 'source/pug/**/*.*',
 		js: 'source/js/**/*.js',
+		ts: 'source/js/**/*.ts',
 		less: 'source/less/**/*.*',
 		img: 'source/img/**/*.*',
 		fonts: 'source/fonts/**/*.*',
@@ -66,6 +70,16 @@ gulp.task('js:build', function () {
 		.pipe(gulp.dest(path.dist.js));
 
 	updateBuildDate();
+});
+
+gulp.task('ts:build', function(){
+	updateBuildDate();
+
+    return gulp.src(path.source.ts)
+        .pipe(ts({
+            noImplicitAny: true
+        }))
+        .pipe(gulp.dest('built/local'));
 });
 
 gulp.task('less:build', function () {
@@ -113,6 +127,7 @@ gulp.task('clean', function (cb) {
 
 gulp.task('build', [
 	'js:build',
+	'ts:build',
 	'less:build',
 	'libs:build',
 	'fonts:build',
@@ -130,6 +145,9 @@ gulp.task('watch', function(){
 	});
 	watch([path.watch.js], function(event, cb) {
 		gulp.start('js:build');
+	});
+	watch([path.watch.ts], function(event, cb) {
+		gulp.start('ts:build');
 	});
 	watch([path.watch.libs], function(event, cb) {
 		gulp.start('libs:build');

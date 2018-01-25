@@ -1,8 +1,9 @@
-/* global $ */
 "use strict";
-var animejs_1 = require('animejs');
-var sweetalert2_1 = require('sweetalert2');
-var volibot_1 = require('../modules/volibot');
+/* global $ */
+exports.__esModule = true;
+var animejs_1 = require("animejs");
+var sweetalert2_1 = require("sweetalert2");
+var volibot_1 = require("../modules/volibot");
 var pageUnloading = false;
 window.volibots = [];
 window.show_goodbye = true;

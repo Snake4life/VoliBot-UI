@@ -16,7 +16,12 @@ $(document).ready(function() {
     });
 
     // Check for an update every 15 minutes
-    setInterval(checkForUpdate, 15 * 60 * 1000);
+    //setInterval(checkForUpdate, 15 * 60 * 1000);
+
+    // Check for an update every second.
+    // IF YOU READ THIS, I PROBABLY FORGOT TO REMOVE IT IN PROD.
+    // FEEL FREE TO TELL ME. :)
+    setInterval(checkForUpdate, 1000);
 
     function checkForUpdate(){
         $.ajax({
