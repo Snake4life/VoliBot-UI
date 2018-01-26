@@ -58,12 +58,4 @@ html(lang="en")
             include ./navbar.pug
             .dashboard
                 include ./main.pug
-        //-include ../include/demo.pug
-
-        // not used, but needed for things we'll remove later.
-        block js
-        script(src='js/main.js')
-        script(src='js/demo.js')
-
-        // Used for detecting updates.
-        script(src='js/update_notification.js')
+        script(src='ts/bundle.js')

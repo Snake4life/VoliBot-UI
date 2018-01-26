@@ -1,6 +1,6 @@
-'use strict';
-
 var browserify = require('browserify');
+var transform  = require('vinyl-transform');
+var uglify     = require('gulp-uglify');
 var gulp 	   = require('gulp');
 var prefixer   = require('gulp-autoprefixer');
 var cssmin     = require('gulp-cssmin');
@@ -14,12 +14,15 @@ var webserver  = require('gulp-webserver');
 var pngquant   = require('imagemin-pngquant');
 var rimraf     = require('rimraf');
 var fs         = require('fs');
-var ts         = require('gulp-typescript');
+var tsify      = require('tsify');
+var watchify   = require('watchify');
+var sourcemaps = require('gulp-sourcemaps');
+var source     = require('vinyl-source-stream');
+var buffer     = require('vinyl-buffer');
 
 var path = {
 	dist: {
 		html: 'dist/',
-		js: 'dist/js/',
 		ts: 'dist/ts/',
 		css: 'dist/css/',
 		img: 'dist/img/',
@@ -29,8 +32,7 @@ var path = {
 	},
 	source: {
 		pug: 'source/pug/*.pug',
-		js: 'source/js/**/*.js',
-		ts: 'source/js/**/*.ts',
+		ts: 'source/ts/index.ts',
 		less: 'source/less/*.less',
 		img: 'source/img/**/*.*',
 		fonts: 'source/fonts/**/*.*',
@@ -39,8 +41,7 @@ var path = {
 	},
 	watch: {
 		pug: 'source/pug/**/*.*',
-		js: 'source/js/**/*.js',
-		ts: 'source/js/**/*.ts',
+		ts: 'source/ts/**/*.ts',
 		less: 'source/less/**/*.*',
 		img: 'source/img/**/*.*',
 		fonts: 'source/fonts/**/*.*',
@@ -50,6 +51,7 @@ var path = {
 };
 
 function updateBuildDate() {
+	try { fs.mkdirSync(path.dist.other); } catch(e) {} // If the folder doesn't exist, create it.
 	fs.writeFileSync(path.dist.other + 'build-date.txt', new Date());
 }
 
@@ -61,25 +63,25 @@ gulp.task('pug:build', function () {
 	updateBuildDate();
 });
 
-gulp.task('js:build', function () {
-	gulp.src(path.source.js, {read: false})
-		.pipe(tap(function (file) {
-			// replace file contents with browserify's bundle stream
-			file.contents = browserify(file.path, {debug: false}).bundle();
-		}))
-		.pipe(gulp.dest(path.dist.js));
-
-	updateBuildDate();
-});
-
-gulp.task('ts:build', function(){
+gulp.task('ts:build', function () {
 	updateBuildDate();
 
-    return gulp.src(path.source.ts)
-        .pipe(ts({
-            noImplicitAny: true
-        }))
-        .pipe(gulp.dest('built/local'));
+	return browserify({
+        basedir: './source/ts/.',
+        cache: {},
+        packageCache: {}
+    })
+	.add('main.ts')
+	.plugin(tsify)
+	.bundle()
+	.on('error', function (error) { console.error(error.toString()); })
+	.pipe(source('bundle.js'))
+	.pipe(gulp.dest(path.dist.ts));
+	.pipe(buffer())
+	.pipe(sourcemaps.init({loadMaps: true}))
+	.pipe(uglify())
+	.pipe(sourcemaps.write('./'))
+	.pipe(gulp.dest(path.dist.ts));
 });
 
 gulp.task('less:build', function () {
@@ -89,7 +91,7 @@ gulp.task('less:build', function () {
 		.pipe(gulp.dest(path.dist.css))
 		.pipe(cssmin())
 		.pipe(rename({suffix: '.min'}))
-		.pipe(gulp.dest(path.dist.css+'min/'));
+		.pipe(gulp.dest(path.dist.css + 'min/'));
 
 	updateBuildDate();
 });
@@ -120,13 +122,11 @@ gulp.task('other:build', function() {
 		.pipe(gulp.dest(path.dist.other));
 });
 
-
 gulp.task('clean', function (cb) {
 	rimraf('./dist', cb);
 });
 
 gulp.task('build', [
-	'js:build',
 	'ts:build',
 	'less:build',
 	'libs:build',
@@ -142,9 +142,6 @@ gulp.task('watch', function(){
 	});
 	watch([path.watch.less], function(event, cb) {
 		gulp.start('less:build');
-	});
-	watch([path.watch.js], function(event, cb) {
-		gulp.start('js:build');
 	});
 	watch([path.watch.ts], function(event, cb) {
 		gulp.start('ts:build');
@@ -165,7 +162,7 @@ gulp.task('webserver', function() {
     .pipe(webserver({
 		port: process.env.PORT || 8080,
 		livereload: false,
-		host: process.env.IP || "0.0.0.0",
+		host: process.env.IP || "127.0.0.1",
     	open: true
     }));
 });
@@ -175,7 +172,7 @@ gulp.task('webserver-livereload', function() {
     .pipe(webserver({
 		port: process.env.PORT || 8080,
 		livereload: true,
-		host: process.env.IP || "0.0.0.0",
+		host: process.env.IP || "127.0.0.1",
     	open: true
     }));
 });
