@@ -6,32 +6,32 @@
 // NO MATTER HOW LONG IT'LL TAKE
 // IT'LL BE WORTH IT TO USE A SANE LANGUAGE
 
-import VoliClient from "./VoliClient";
-import LeagueAccount from './Models/LeagueAccount';
+import { VoliClient } from "./VoliClient";
+import { LeagueAccount } from './Models/LeagueAccount';
 
-export default class VoliBot {
+export class VoliBot {
 	socket: WebSocket;
+
 	clients: { [id: string] : VoliClient } = { };
-	wsCallbacks: { [id: string] : (data: any) => void };
+	wsCallbacks: { [id: string] : (data: any) => void } = { };
 
 	get ClientCount(): number {
 		return Object.keys(this.clients).length
 	}
 
-	constructor(hostname: string, port: number, onOpen?: (args?: any) => void, onClose?: (args?: any) => void){
-		this.clients = {};
+	constructor(hostname: string, port: number, onOpen?: (bot: VoliBot, args?: any[]) => void, onClose?: (bot: VoliBot, args?: any[]) => void){
 		this.socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
 
 		let self: VoliBot = this;
 
 		this.socket.onopen = (...args: any[]) => {
-			self.wsCallbacks["LoggingOut"] = self.onLoggingOut;
-			self.wsCallbacks["UpdateStatus"] = self.onUpdateStatus;
-			self.wsCallbacks["ListInstance"] = self.onListInstance;
-			self.wsCallbacks["UpdatePhase"] = self.onUpdatePhase;
+			this.wsCallbacks["LoggingOut"] = this.onLoggingOut;
+			this.wsCallbacks["UpdateStatus"] = this.onUpdateStatus;
+			this.wsCallbacks["ListInstance"] = this.onListInstance;
+			this.wsCallbacks["UpdatePhase"] = this.onUpdatePhase;
 
 			if (onOpen != undefined)
-				onOpen(...args);
+				onOpen(self, ...args);
 				
 			this.send("RequestInstanceList", "", () => {});
 		};
@@ -42,7 +42,7 @@ export default class VoliBot {
 
 		this.socket.onclose = function (...args: any[]){
 			if (onClose != undefined)
-				onClose(...args);
+				onClose(self, ...args);
 		};
 
 		this.socket.onmessage = function (event) {
@@ -110,8 +110,11 @@ export default class VoliBot {
 
 		// TODO: Update UI
 	}
+
 	onListInstance(data: any){
-		var allClients = data[2].List as VoliClient[];
+		console.log(data);
+		let allClients = data[2].List as VoliClient[];
+		if (allClients == null) return;
 
 		allClients.forEach(x => {
 			if (x !== null)

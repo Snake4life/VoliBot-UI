@@ -1,4 +1,4 @@
-enum LeagueRegion {
+export enum LeagueRegion {
     EUNE,
     EUW,
     JP,
@@ -9,5 +9,3 @@ enum LeagueRegion {
     RU,
     TR,
 }
-
-export default LeagueRegion;

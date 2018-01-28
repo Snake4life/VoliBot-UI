@@ -1,3 +1,3 @@
-export default class VoliClient {
+export class VoliClient {
     id: number;
 }

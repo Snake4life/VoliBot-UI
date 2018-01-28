@@ -1,4 +1,4 @@
-export default class LeagueAccountSettings{
+export class LeagueAccountSettings{
     queue: number;
     autoplay: boolean;
 

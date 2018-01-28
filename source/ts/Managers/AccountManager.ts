@@ -1,11 +1,13 @@
-import VoliBot from '../VoliBot';
-import LeagueAccount from '../Models/LeagueAccount';
+import { VoliBot } from '../VoliBot';
+import { LeagueAccount } from '../Models/LeagueAccount';
+import { IManager } from "./IManager";
 
-export default class AccountManager {
+export class AccountsManager implements IManager {
+    initialize(){}
+
     voliBots: VoliBot[];
 
     constructor(voliBots?: VoliBot[]){
-        debugger;
         this.voliBots = voliBots || new Array<VoliBot>();
     }
 
@@ -15,3 +17,5 @@ export default class AccountManager {
         //orderedBots[0].addAccount(account);
     }
 }
+
+export var Accounts = new AccountsManager();

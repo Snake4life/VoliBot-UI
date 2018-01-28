@@ -1,13 +1,15 @@
 {
+    "files": [
+        "main.ts"
+    ],
     "compileOnSave": true,
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "module": "commonjs",
         "sourceMap": true,
         "allowJs": false,
         "declaration": true,
         "removeComments": true,
-        "importHelpers": true,
         "alwaysStrict": true,
         "strict": true,
         "noImplicitAny": true,
@@ -22,6 +24,5 @@
         "allowSyntheticDefaultImports": true,
         "inlineSourceMap": true,
         "inlineSources": true
-    },
-    "files": []
+    }
 }

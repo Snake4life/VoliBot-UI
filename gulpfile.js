@@ -1,6 +1,5 @@
 var browserify = require('browserify');
 var transform  = require('vinyl-transform');
-var uglify     = require('gulp-uglify');
 var gulp 	   = require('gulp');
 var prefixer   = require('gulp-autoprefixer');
 var cssmin     = require('gulp-cssmin');
@@ -15,8 +14,8 @@ var pngquant   = require('imagemin-pngquant');
 var rimraf     = require('rimraf');
 var fs         = require('fs');
 var tsify      = require('tsify');
+var babelify   = require('babelify');
 var watchify   = require('watchify');
-var sourcemaps = require('gulp-sourcemaps');
 var source     = require('vinyl-source-stream');
 var buffer     = require('vinyl-buffer');
 
@@ -32,7 +31,7 @@ var path = {
 	},
 	source: {
 		pug: 'source/pug/*.pug',
-		ts: 'source/ts/index.ts',
+		ts: 'source/ts/**/*.ts',
 		less: 'source/less/*.less',
 		img: 'source/img/**/*.*',
 		fonts: 'source/fonts/**/*.*',
@@ -67,20 +66,18 @@ gulp.task('ts:build', function () {
 	updateBuildDate();
 
 	return browserify({
-        basedir: './source/ts/.',
-        cache: {},
+		basedir: "./source/ts",
+		entries: "main.ts",
+		debug: true,
+    	cache: {},
         packageCache: {}
-    })
-	.add('main.ts')
+	})
 	.plugin(tsify)
+	.transform(babelify, { "extensions": [".js", ".ts"] })
 	.bundle()
 	.on('error', function (error) { console.error(error.toString()); })
 	.pipe(source('bundle.js'))
-	.pipe(gulp.dest(path.dist.ts));
 	.pipe(buffer())
-	.pipe(sourcemaps.init({loadMaps: true}))
-	.pipe(uglify())
-	.pipe(sourcemaps.write('./'))
 	.pipe(gulp.dest(path.dist.ts));
 });
 

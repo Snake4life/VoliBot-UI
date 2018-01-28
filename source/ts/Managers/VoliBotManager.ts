@@ -1,19 +1,30 @@
-import VoliBot from '../VoliBot';
+import { VoliBot } from '../VoliBot';
 
-export default class VoliBotManager{
-    voliBotInstances: VoliBot[];
+export class VoliBotManager{
+    voliBotInstances: VoliBot[] = new Array<VoliBot>();
+    initialize(){}
 
-    addVoliBotInstance(url: string, port: number){
-        new VoliBot(url, port, this.onVoliBotOpen, this.onVoliBotClose);
+    addVoliBotInstance(url: string, port: number) {
+        new VoliBot(url, port, x => {
+            this.onVoliBotOpen(x)
+        }, (x, y) => {
+            this.onVoliBotClose(x, y)
+        });
     }
 
-    private onVoliBotOpen(args: any){
-        args;
-        debugger;
-        this.voliBotInstances.push()
+    private onVoliBotOpen(volibot: VoliBot){
+        this.voliBotInstances.push(volibot);
     }
 
-    private onVoliBotClose(args: any){
+    private onVoliBotClose(bot: VoliBot, args: any){
+        this.removeBot(bot);
         args;
+    }
+
+    private removeBot(bot: VoliBot){
+        var index = this.voliBotInstances.indexOf(bot, 0);
+        if (index > -1) {
+            this.voliBotInstances.splice(index, 1);
+        };
     }
 }
