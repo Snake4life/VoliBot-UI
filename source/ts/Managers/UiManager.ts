@@ -1,6 +1,6 @@
 import { IManager } from './IManager';
-import { UiComponentBase } from '../Ui/Components';
-import { ScreenBase } from '../Ui/Screens';
+import { UiComponentBase } from '../UI/Components';
+import { ScreenBase } from '../UI/Screens';
 import { AnimeTimelineInstance } from 'animejs';
 import * as anime from 'animejs';
 
@@ -129,4 +129,4 @@ export class UiManager implements IManager {
     }
 }
 
-export var Ui = new UiManager();
+export var UI = new UiManager();

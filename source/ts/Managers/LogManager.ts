@@ -1,36 +1,56 @@
 import { IManager } from "./IManager";
 
+class LogItem {
+    time: Date;
+    data: any;
+    level: LogLevel;
+}
+
+export enum LogLevel{
+    Debugging,
+    Info,
+    Warning,
+    Error
+}
+
 export class LogManager implements IManager {
+    private logs: LogItem[] = new Array<LogItem>();
     initialize() {
-        let log = function() {
-            console.log(arguments);
-            return Function.prototype.bind.call(console.log, console);
-        }();
 
-        log("This is a test");
-        log("Test2!");
-        log("Test3!");
+    }
 
-        //var Debugger = function(gState, klass) {
-        //    this.debug = {}
-        //    if (gState && klass.isDebug) {
-        //      for (var m in console)
-        //        if (typeof console[m] == 'function')
-        //          this.debug[m] = console[m].bind(window.console, klass.toString()+": ")
-        //    }else{
-        //      for (var m in console)
-        //        if (typeof console[m] == 'function')
-        //          this.debug[m] = function(){}
-        //    }
-        //    return this.debug
-        //}
+    debug(data: any){
+        this.logs.push({
+            level: LogLevel.Debugging,
+            data: data,
+            time: new Date()
+        } as LogItem);
+        console.debug(data);
+    }
+    info(data: any){
+        this.logs.push({
+            level: LogLevel.Debugging,
+            data: data,
+            time: new Date()
+        } as LogItem);
+        console.info(data);
+    }
+    warn(data: any){
+        this.logs.push({
+            level: LogLevel.Debugging,
+            data: data,
+            time: new Date()
+        } as LogItem);
+        console.warn(data);
+    }
+    error(data: any){
+        this.logs.push({
+            level: LogLevel.Debugging,
+            data: data,
+            time: new Date()
+        } as LogItem);
+        console.error(data);
     }
 }
 
 export var Log = new LogManager();
-
-/*
-class LogItem {
-    logTime: Date;
-    logData: any;
-}*/

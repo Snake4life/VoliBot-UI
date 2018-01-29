@@ -1,6 +1,7 @@
 import { VoliBot } from '../VoliBot';
 
-export class VoliBotManager{
+//TODO: Rename to something that makes sense
+export class VoliBotManagerClass{
     voliBotInstances: VoliBot[] = new Array<VoliBot>();
     initialize(){}
 
@@ -28,3 +29,5 @@ export class VoliBotManager{
         };
     }
 }
+
+export var VoliBotManager = new VoliBotManagerClass(); 

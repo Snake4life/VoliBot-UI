@@ -1,7 +1,5 @@
-import {Ui} from './Managers/UiManager';
-import { Log } from './Managers/LogManager';
-import { UiLogin } from './Ui/Login';
-import { Notifications } from './Managers/NotificationManager';
+import { Log, UI, Notifications, Settings, Accounts, VoliBotManager } from './Managers';
+import { UiLogin } from './UI/Login';
 
 window.onerror = function (_, __, ___, ____, _____) {
     let crashId = uuidv4();
@@ -65,8 +63,11 @@ window.onerror = function (_, __, ___, ____, _____) {
     }
 };
 
-Ui.registerScreen(new UiLogin());
+UI.registerScreen(new UiLogin());
 
 Log.initialize();
-Ui.initialize();
-VoliBotManager.
+Settings.initialize();
+Notifications.initialize();
+Accounts.initialize();
+VoliBotManager.initialize();
+UI.initialize();

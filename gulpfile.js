@@ -67,12 +67,13 @@ gulp.task('ts:build', function () {
 
 	return browserify({
 		basedir: "./source/ts",
-		entries: "main.ts",
+		entries: "Main.ts",
 		debug: true,
     	cache: {},
         packageCache: {}
 	})
 	.plugin(tsify)
+	.on('error', function (error) { console.error(error.toString()); })
 	.transform(babelify, { "extensions": [".js", ".ts"] })
 	.bundle()
 	.on('error', function (error) { console.error(error.toString()); })

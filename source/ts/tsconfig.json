@@ -1,6 +1,6 @@
 {
     "files": [
-        "main.ts"
+        "Main.ts"
     ],
     "compileOnSave": true,
     "compilerOptions": {

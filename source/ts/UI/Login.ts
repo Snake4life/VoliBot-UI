@@ -4,7 +4,7 @@ import swal from 'sweetalert2';
 
 import HostData from '../Models/HostData';
 
-import { Managers } from '../Managers';
+import { Settings, UI, VoliBotManager } from '../Managers';
 import { ScreenBase } from './Screens';
 
 export class UiLogin extends ScreenBase {
@@ -22,27 +22,27 @@ export class UiLogin extends ScreenBase {
 		else
 			throw new Error("Could not get element: #LoginView");
 
-		Managers.SettingsManager.registerSetting("login__hostname", "localhost");
-		Managers.SettingsManager.registerSetting("login__automatically", false);
+		Settings.registerSetting("login__hostname", "localhost");
+		Settings.registerSetting("login__automatically", false);
 	}
 
 	hookUi() {
 		$('.login__form').submit(() => this.doLogin());
-		$('#login__hostname').val(Managers.SettingsManager.getString("login__hostname"));
+		$('#login__hostname').val(Settings.getString("login__hostname"));
 
-		$('#login__remember').prop("checked", Managers.SettingsManager.getString("login__hostname"));
+		$('#login__remember').prop("checked", Settings.getString("login__hostname"));
 		$('#login__remember').change(() => {
 			if (!$('#login__remember').is(":checked"))
-				Managers.SettingsManager.reset("login__hostname");
+				Settings.reset("login__hostname");
 		});
 
-		$('#login__automatically').prop("checked", Managers.SettingsManager.getBoolean("login__automatically"));
-		$('#login__automatically').change(() => Managers.SettingsManager.set("login__automatically", $('#login__automatically').is(":checked")));
+		$('#login__automatically').prop("checked", Settings.getBoolean("login__automatically"));
+		$('#login__automatically').change(() => Settings.set("login__automatically", $('#login__automatically').is(":checked")));
 
-		if (Managers.SettingsManager.getBoolean("login__automatically")) {
+		if (Settings.getBoolean("login__automatically")) {
 			this.doLogin();
 		} else {
-			Managers.UiManager.setCurrentScreen(this).add({
+			UI.setCurrentScreen(this).add({
 				targets: '.volibot-logo>svg>g>path',
 				strokeDashoffset: [anime.setDashoffset, 0],
 				easing: 'easeInOutSine',
@@ -116,7 +116,7 @@ export class UiLogin extends ScreenBase {
 				let hostData = this.parseHost(hostname, 8000);
 				
 				try{
-					Managers.VoliBotManager.addVoliBotInstance(hostData.url, hostData.port);
+					VoliBotManager.addVoliBotInstance(hostData.url, hostData.port);
 				}catch (e) {
 					debugger;
 				}finally{
