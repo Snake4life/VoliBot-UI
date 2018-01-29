@@ -5,11 +5,21 @@ export class VoliBotManagerClass{
     voliBotInstances: VoliBot[] = new Array<VoliBot>();
     initialize(){}
 
+    //TODO: Promises?
     addVoliBotInstance(url: string, port: number) {
-        new VoliBot(url, port, x => {
-            this.onVoliBotOpen(x)
-        }, (x, y) => {
-            this.onVoliBotClose(x, y)
+        return new Promise<boolean>(resolve => {
+            try{
+                new VoliBot(url, port, x => {
+                    resolve(true);
+                    this.onVoliBotOpen(x);
+                }, (x, y) => {
+                    resolve(false);
+                    this.onVoliBotClose(x, y);
+                });
+            }
+            catch(e){
+                resolve(false);
+            }
         });
     }
 

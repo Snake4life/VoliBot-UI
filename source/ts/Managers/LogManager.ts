@@ -2,8 +2,9 @@ import { IManager } from "./IManager";
 
 class LogItem {
     time: Date;
-    data: any;
+    data: string;
     level: LogLevel;
+    stack: string;
 }
 
 export enum LogLevel{
@@ -15,41 +16,50 @@ export enum LogLevel{
 
 export class LogManager implements IManager {
     private logs: LogItem[] = new Array<LogItem>();
+
     initialize() {
 
+    }
+
+    toJson(): string{
+        return JSON.stringify(this.logs, null, "\t");
     }
 
     debug(data: any){
         this.logs.push({
             level: LogLevel.Debugging,
-            data: data,
+            data: data.toString(),
             time: new Date()
         } as LogItem);
         console.debug(data);
     }
+
     info(data: any){
         this.logs.push({
             level: LogLevel.Debugging,
-            data: data,
+            data: data.toString(),
             time: new Date()
         } as LogItem);
         console.info(data);
     }
+
     warn(data: any){
         this.logs.push({
             level: LogLevel.Debugging,
-            data: data,
+            data: data.toString(),
             time: new Date()
         } as LogItem);
         console.warn(data);
     }
-    error(data: any){
+
+    error(message: string, error: Error = new Error()){
         this.logs.push({
             level: LogLevel.Debugging,
-            data: data,
-            time: new Date()
+            data: message + error.message.toString(),
+            time: new Date(),
+            stack: error.stack
         } as LogItem);
-        console.error(data);
+        console.error(`${message}: ${error.message} `);
     }
 }
 

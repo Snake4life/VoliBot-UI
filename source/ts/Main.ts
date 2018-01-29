@@ -1,16 +1,22 @@
 import { Log, UI, Notifications, Settings, Accounts, VoliBotManager } from './Managers';
-import { UiLogin } from './UI/Login';
+import { UiLogin } from './UI/Screens/Login';
+import * as $ from 'jquery';
+import swal from 'sweetalert2';
 
-window.onerror = function (_, __, ___, ____, _____) {
+window.onerror = function (_, __, ___, ____, error) {
     let crashId = uuidv4();
 
-    // TODO: Error reporting back to a main server.
+    error = error || new Error("No error object received.");
+
+    //TODO: Handle this serverside somewhere
+    Log.error("Uncaught Exception: ", error);
+
+    alert(Log.toJson());
 
     Notifications.fullscreenNotification({
         type: "error",
         title: "An unhandled error has occured and VoliBot's UI crashed! :(",
         html: 
-            "The error has already been reported to the VoliBot team."                                                    + "<br>" +
             "If reloading the browser window does not solve the issue, or you want to add additional info to the report:" + "<br>" + 
             "<br>" +
             '<div style="text-align: left">' +
@@ -44,11 +50,21 @@ window.onerror = function (_, __, ___, ____, _____) {
         showCancelButton: false,
         showCloseButton: false,
         showConfirmButton: true,
-        confirmButtonText: "Reload VoliBot-UI",
+        confirmButtonText: "Reload VoliBot-UI",        
         onClose: () => {
             window.location.reload();
         }
     });
+
+    //TODO: Add loading commands to Notifications, no other script should access swal.
+    swal.showLoading();
+    $.post(
+        "/",
+        Log.toJson(),
+        () => swal.hideLoading()
+    )
+    .fail(() => swal.showValidationError("Could not automatically report the error.<br>Please follow the steps above if this happens more than once!"))
+    .always(() => swal.hideLoading());
 
     var suppressErrorAlert = false;
     // If you return true, then error alerts (like in older versions of 

@@ -2,10 +2,11 @@ import * as $ from 'jquery';
 import * as anime from 'animejs';
 import swal from 'sweetalert2';
 
-import HostData from '../Models/HostData';
+import HostData from '../../Models/HostData';
 
-import { Settings, UI, VoliBotManager } from '../Managers';
-import { ScreenBase } from './Screens';
+import { Settings, UI, VoliBotManager } from '../../Managers';
+import { ScreenBase } from '../Screens';
+import { Notifications } from '../../Managers/NotificationManager';
 
 export class UiLogin extends ScreenBase {
 	registerComponents() { }
@@ -72,7 +73,7 @@ export class UiLogin extends ScreenBase {
 		return new HostData(hostData[1] as string, hostData[2] as number);
 	}
 
-	async doLogin() {
+	doLogin() {
 		var hostname: string | undefined = $('#login__hostname').val() as string | undefined;
 		//var password = $('#login__password').val(); // Not used, add to allow opening ports to the public?
 		var remember = $('#login__remember').is(":checked");
@@ -85,20 +86,21 @@ export class UiLogin extends ScreenBase {
 		$('#login__hostname').val(hostname);
 
 		if (remember)
-			window.localStorage.setItem("login__hostname", hostname);
+			Settings.set("login__hostname", hostname);
 		else
-			window.localStorage.setItem("login__hostname", "");
+			Settings.reset("login__hostname");
 
-		window.localStorage.setItem("login__automatically", autologin ? "true" : "");
+		Settings.set("login__automatically", autologin);
 
 
 		let loadingTimeout: number | undefined;
+		let notificationId: number | undefined;
 
 		try {
 			// If connecting takes more than 100ms, do not show the "connecting" modal.
 			// This hides it if you are immediately connected, but shows it if there's any issues or delays.
 			loadingTimeout = setTimeout(function () {
-				swal({
+				notificationId = Notifications.fullscreenNotification({
 					title: 'Connecting to VoliBot',
 					type: 'info',
 					onOpen: swal.showLoading,
@@ -115,17 +117,21 @@ export class UiLogin extends ScreenBase {
 				let hostname = hostnames[index];
 				let hostData = this.parseHost(hostname, 8000);
 				
-				try{
-					VoliBotManager.addVoliBotInstance(hostData.url, hostData.port);
-				}catch (e) {
-					debugger;
-				}finally{
-					clearTimeout(loadingTimeout);
-				}
+				VoliBotManager.addVoliBotInstance(hostData.url, hostData.port, () => {
+					if (loadingTimeout != undefined)
+						clearTimeout(loadingTimeout);
+					if (notificationId != undefined)
+						Notifications.closeFullscreenNotification(notificationId);
+
+					loadingTimeout = undefined;
+					notificationId = undefined;
+				});
 			}
 		} catch (e) {
 			if (loadingTimeout != undefined)
 				clearTimeout(loadingTimeout);
+			if (notificationId != undefined)
+				Notifications.closeFullscreenNotification(notificationId);
 			console.error(e);
 			this.onClose(new CloseEvent("Closed"));
 		}
