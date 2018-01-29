@@ -46,6 +46,7 @@ var path = {
 };
 
 function updateBuildDate() {
+	try {fs.mkdirSync(dir);} catch(e) {}
 	fs.writeFileSync(path.dist.other + 'build-date.txt', new Date());
 }
 
