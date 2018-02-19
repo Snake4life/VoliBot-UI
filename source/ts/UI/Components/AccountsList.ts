@@ -1,5 +1,12 @@
 import * as $ from 'jquery';
+
+// I have no clue WHY this works, but it works, so I'm going to leave it here.
+// If someone feels like fixing it, PLEASE do, but be prepared to spend some time with it.
+//TODO: This REALLY shouldn't be done this way.
+//WARNING: This REALLY REALLY shouldn't be done this way.
 import 'datatables.net';
+declare var require: any;
+require('datatables.net')(window, $);
 
 import { VoliBotManager } from '../../Managers';
 import { UiComponentBase } from './';
@@ -11,9 +18,8 @@ export class ComponentAccountsList extends UiComponentBase {
 
     hookUi(): void {
         VoliBotManager.addCallbackHandler("ListInstance", x => this.updateAccountsList(x[2].List));
-        //this.accountsTable = $('.datatable').DataTable();
+        this.accountsTable = $('.datatable').DataTable();
         this.accountCount = $("#account_count");
-        debugger;
     }
 
     updateAccountsList(clients: VoliClient[]){
