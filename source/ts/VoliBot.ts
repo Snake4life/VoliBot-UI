@@ -14,7 +14,7 @@ export class VoliBot {
 	socket: WebSocket;
 
 	clients: { [id: string] : VoliClient } = { };
-	wsCallbacks: { [id: string] : (data: any) => void } = { };
+	private wsCallbacks: { [id: string] : (data: any) => void } = { };
 
 	addCallbackHandler(id: string, handler: (data: any) => void) {
 		if (this.wsCallbacks[id]){
@@ -105,11 +105,11 @@ export class VoliBot {
 	//#endregion
 
 	//#region Websocket event handlers
-	onLoggingOut(data: any){
+	private onLoggingOut(data: any){
 		data;
 	}
 
-	onUpdateStatus(data: any){
+	private onUpdateStatus(data: any){
 		if (this.clients[data[2].id] === null)
 		{
 			Log.warn("Recieved status for client we were not aware existed!");
@@ -123,7 +123,7 @@ export class VoliBot {
 		//TODO: Update UI
 	}
 
-	onListInstance(data: any){
+	private onListInstance(data: any){
 		Log.debug(data);
 		let allClients = data[2].List as VoliClient[];
 		if (allClients == null) return;
@@ -135,7 +135,7 @@ export class VoliBot {
 		//TODO: Refresh UI
 	}
 
-	onUpdatePhase(data: any){
+	private onUpdatePhase(data: any){
 		Log.debug(this);
 		this.send("RequestInstanceList", "", () => {});
 

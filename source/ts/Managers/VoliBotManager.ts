@@ -3,9 +3,26 @@ import { VoliBot } from '../VoliBot';
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass{
     private voliBotInstances: VoliBot[] = new Array<VoliBot>();
+	private defaultWsCallbacks: { [id: string] : (data: any) => void } = { };
+
     initialize(){
 
     }
+
+    addCallbackHandler(id: string, handler: (data: any) => void) {
+        //HERE
+		if (this.defaultWsCallbacks[id]){
+			this.defaultWsCallbacks[id] = (x) => {
+				this.defaultWsCallbacks[id](x);
+				handler(x);
+			};
+		}else{
+            this.defaultWsCallbacks[id] = handler;
+            this.do(x => {
+                x.addCallbackHandler(id, handler);
+            });
+		}
+	}
 
     do(x: (voliBotInstance: VoliBot) => void){
         this.voliBotInstances.forEach(x);
@@ -27,13 +44,20 @@ export class VoliBotManagerClass{
     async addVoliBotInstance(url: string, port: number) {
         return new Promise<boolean>(resolve => {
             try{
-                this.voliBotInstances.push(new VoliBot(url, port, x => {
+                let voliBot = new VoliBot(url, port, x => {
                     resolve(true);
                     this.onVoliBotOpen(x);
                 }, (x, y) => {
                     resolve(false);
                     this.onVoliBotClose(x, y);
-                }));
+                })
+
+                Object.keys(this.defaultWsCallbacks).forEach(key => {
+                    //HERE
+                    voliBot.addCallbackHandler(key, this.defaultWsCallbacks[key]);
+                })
+
+                this.voliBotInstances.push(voliBot);
             }
             catch(e){
                 resolve(false);
