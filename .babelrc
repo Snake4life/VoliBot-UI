@@ -1,5 +1,14 @@
 {
-    "presets": ["env"],
+    "presets": [
+        ["env", {
+        "targets": {
+                "browsers": [
+                    "last 4 versions",
+                    "Explorer 11"
+                ]
+            }
+        }]
+    ],
     "plugins": [
         ["transform-runtime", {
             "polyfill": false,

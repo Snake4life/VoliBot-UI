@@ -1,3 +1,4 @@
+import { Log } from './Managers';
 /* global $ */     // jQuery
 /* global Chart */ // Chart.js
 
@@ -15,14 +16,23 @@ export class VoliBot {
 	clients: { [id: string] : VoliClient } = { };
 	wsCallbacks: { [id: string] : (data: any) => void } = { };
 
+	addCallbackHandler(id: string, handler: (data: any) => void) {
+		if (this.wsCallbacks[id]){
+			this.wsCallbacks[id] = (x) => {
+				this.wsCallbacks[id](x);
+				handler(x);
+			}
+		}else{
+			this.wsCallbacks[id] = handler;
+		}
+	}
+
 	get ClientCount(): number {
 		return Object.keys(this.clients).length
 	}
 
 	constructor(hostname: string, port: number, onOpen?: (bot: VoliBot, args?: any[]) => void, onClose?: (bot: VoliBot, args?: any[]) => void){
 		this.socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
-
-		let self: VoliBot = this;
 
 		this.socket.onopen = (...args: any[]) => {
 			this.wsCallbacks["LoggingOut"] = this.onLoggingOut;
@@ -31,38 +41,39 @@ export class VoliBot {
 			this.wsCallbacks["UpdatePhase"] = this.onUpdatePhase;
 
 			if (onOpen != undefined)
-				onOpen(self, ...args);
+				onOpen(this, ...args);
 				
 			this.send("RequestInstanceList", "", () => {});
 		};
 
-		this.socket.onerror = function(error){
-			console.error(error);
-		};
+		this.socket.onerror = (error: Event) => {
+			Log.warn("WebSocket onError: " + JSON.stringify(error));
+		}
 
-		this.socket.onclose = function (...args: any[]){
+		this.socket.onclose = (...args: any[]) => {
 			if (onClose != undefined)
-				onClose(self, ...args);
-		};
+				onClose(this, ...args);
+		}
 
-		this.socket.onmessage = function (event) {
+		this.socket.onmessage = (event: MessageEvent) => {
 			var data = JSON.parse(event.data);
-			console.log(data);
-			if ((data[0] == MessageType.RESPONSE_ERROR || data[0] == MessageType.RESPONSE_SUCCESS) && 
-				self.wsCallbacks[data[1]] != null)
-				self.wsCallbacks[data[1]](data);
+			Log.debug("Received data: " + JSON.stringify(data));
+			if ((data[0] == MessageType.RESPONSE_ERROR || data[0] == MessageType.RESPONSE_SUCCESS) && this.wsCallbacks[data[1]] != null)
+				this.wsCallbacks[data[1]].call(this, data);
 
-			if (data[0] == MessageType.EVENT && self.wsCallbacks[data[1]] != null)
-				self.wsCallbacks[data[1]](data);
-		};
+			if (data[0] == MessageType.EVENT && this.wsCallbacks[data[1]] != null)
+				this.wsCallbacks[data[1]].call(this, data);
+		}
 	}
 
-	addAccount(account: LeagueAccount){
+	addAccount(account: LeagueAccount, onSuccess?: (account: LeagueAccount) => void, onFail?: (account: LeagueAccount) => void){
 		this.requestInstanceStart(account.username, account.password, account.region.toString(), account.settings.queue, account.settings.autoplay, function(result){
 			if (result[2] == "success")
-				debugger;
-   
-			debugger;
+				if (onSuccess)
+					onSuccess(account);
+			else
+				if (onFail)
+					onFail(account);
 		});
 	}
 
@@ -96,37 +107,40 @@ export class VoliBot {
 	//#region Websocket event handlers
 	onLoggingOut(data: any){
 		data;
-		debugger;
 	}
 
 	onUpdateStatus(data: any){
 		if (this.clients[data[2].id] === null)
 		{
-			console.warn("Recieved status for client we were not aware existed!");
+			Log.warn("Recieved status for client we were not aware existed!");
+
+			Log.debug("Refreshing client list");
 			this.send("RequestInstanceList", "");
+		}else{
+			this.clients[data[2].id] = data[2];
 		}
 
-		this.clients[data[2].id] = data[2];
-
-		// TODO: Update UI
+		//TODO: Update UI
 	}
 
 	onListInstance(data: any){
-		console.log(data);
+		Log.debug(data);
 		let allClients = data[2].List as VoliClient[];
 		if (allClients == null) return;
 
-		allClients.forEach(x => {
-			if (x !== null)
+		allClients.forEach((x) => {
+			if (x != null)
 				this.clients[x.id] = x;
-		});
-
+		}, this);
 		//TODO: Refresh UI
 	}
 
 	onUpdatePhase(data: any){
-		data;
+		Log.debug(this);
+		this.send("RequestInstanceList", "", () => {});
+
 		// Ignore this for now
+		data;
 	}
 	//#endregion
 

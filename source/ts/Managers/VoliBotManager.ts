@@ -2,20 +2,38 @@ import { VoliBot } from '../VoliBot';
 
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass{
-    voliBotInstances: VoliBot[] = new Array<VoliBot>();
-    initialize(){}
+    private voliBotInstances: VoliBot[] = new Array<VoliBot>();
+    initialize(){
 
-    //TODO: Promises?
-    addVoliBotInstance(url: string, port: number) {
+    }
+
+    do(x: (voliBotInstance: VoliBot) => void){
+        this.voliBotInstances.forEach(x);
+    }
+
+    get connectedInstanceCount() {
+        return this.voliBotInstances.length;
+    }
+
+    getSorted(compareFn: (a: VoliBot, b: VoliBot) => number){
+        return this.voliBotInstances.sort(compareFn);
+    }
+
+    get instanceWithLeastAccounts() {
+        if (this.voliBotInstances.length <= 0) return null;
+        return this.voliBotInstances.sort((a,b) => (a.ClientCount > b.ClientCount) ? 1 : ((b.ClientCount > a.ClientCount) ? -1 : 0))[0];
+    }
+
+    async addVoliBotInstance(url: string, port: number) {
         return new Promise<boolean>(resolve => {
             try{
-                new VoliBot(url, port, x => {
+                this.voliBotInstances.push(new VoliBot(url, port, x => {
                     resolve(true);
                     this.onVoliBotOpen(x);
                 }, (x, y) => {
                     resolve(false);
                     this.onVoliBotClose(x, y);
-                });
+                }));
             }
             catch(e){
                 resolve(false);

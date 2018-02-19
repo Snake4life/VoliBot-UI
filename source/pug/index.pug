@@ -2,10 +2,15 @@ extends ./parts/layout.pug
 block main
     .tab-content
         .tab-pane.fade.active.in#Dashboard
-            include ./tabs/dashboard.pug
+            div There's nothing here yet. Click on the "Accounts" tab to get started.
+            //- include ./tabs/dashboard.pug
         .tab-pane.fade#Accounts
             include ./tabs/accounts.pug
         .tab-pane.fade#Sessions
-            include ./tabs/sessions.pug
-        .tab-pane.fade#AccountDetailed
-            include ./tabs/account_detailed.pug
+            div
+                p There's nothing here either. Click the "Accounts" tab and leave the other ones alone.
+                p There will be more things here sometime in the future.
+            //- include ./tabs/sessions.pug
+        //- .tab-pane.fade#AccountDetailed
+            //- div Just click the Accounts tab already.
+            //- include ./tabs/account_detailed.pug

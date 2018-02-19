@@ -1,4 +1,5 @@
 import { IManager } from "./IManager";
+import { Log } from "./";
 
 export class SettingsManager implements IManager {
     private settings: { [id: string]: Setting } = {};
@@ -8,30 +9,39 @@ export class SettingsManager implements IManager {
     }
 
     registerSetting(id: string, defaultValue: string | number | boolean) {
+        Log.debug(`Registering setting "${id}" as "${typeof defaultValue}" with default value: ${defaultValue}`)
         if (this.settings[id] != undefined)
-            throw `Can not register duplicate setting: ${id}!`;
+            Log.error(`Can not register duplicate setting: ${id}!`);
 
         this.settings[id] = new Setting(defaultValue);
     }
 
     private loadSettings(): void {
+        Log.info(`Loading all settings`);
         let rawSettings = window.localStorage.getItem("settings");
-        if (rawSettings == null)
+        if (rawSettings == null){
+            Log.info("First time VoliBot UI is launched on this device, or settings has been wiped.");
             return;
+        }
 
         let settings = JSON.parse(rawSettings) as { [id: string]: Setting };
 
         Object.keys(settings).forEach((id) => {
             if (this.settings[id] == undefined)
-                console.error(`Ignoring saved setting ${id} as it is not registered!`)
+            {
+                Log.warn(`Ignoring saved setting "${id}" as it is not registered!`);
+                return;
+            }
             
             let savedType = settings[id].type;
             let registeredType = this.settings[id].type;
 
             if (savedType != registeredType)
-                console.error(`Saved setting ${id} is of type ${savedType} but is registered as type ${registeredType}, ignoring saved value!`)
+                Log.warn(`Saved setting "${id}" is of type "${savedType}" but is registered as type "${registeredType}", ignoring saved value!`);
             else
                 this.settings[id].value = settings[id].value;
+
+            Log.debug(`Loaded saved value for setting "${id}": ${this.settings[id].value}`)
         });
     }
 
@@ -43,7 +53,7 @@ export class SettingsManager implements IManager {
         var value = this.settings[id];
 
         if (value == undefined)
-            throw `Setting does not exist: ${id}!`;
+            throw new Error(`Setting does not exist: ${id}!`);
 
         return value;
     }
@@ -52,7 +62,7 @@ export class SettingsManager implements IManager {
         let value = this.get(id);
 
         if (value.type != 'boolean')
-            throw `Setting is not a boolean: ${id}`;
+            throw new Error(`Setting is not a boolean: ${id}`);
 
         return value.value == 'true';
     }
@@ -61,7 +71,7 @@ export class SettingsManager implements IManager {
         let value = this.get(id);
         
         if (value.type != 'number')
-            throw `Setting is not a number: ${id}`;
+            throw new Error(`Setting is not a number: ${id}`);
 
         return Number(value.value);
     }
@@ -70,24 +80,28 @@ export class SettingsManager implements IManager {
         let value = this.get(id);
         
         if (value.type != 'string')
-            throw `Setting is not a string: ${id}`;
+            throw new Error(`Setting is not a string: ${id}`);
 
         return value.value;
     }
 
-    set(id: string, value: string | number | boolean) {
+    set(id: string, value: string | number | boolean, save: boolean = true) {
         let setting = this.settings[id];
 
         if (setting == undefined)
-            throw `Setting does not exist: ${id}!`;
+            throw new Error(`Setting does not exist: ${id}!`);
 
         if (setting.type != typeof value)
-            throw `Setting ${id} has type ${setting.type} and can not be set to a value with type ${typeof value}!`;
+            throw new Error(`Setting "${id}" has type "${setting.type}" and can not be set to a value with type "${typeof value}"!`);
 
         if (value == undefined)
-            throw `'undefined' is not a valid value for setting: ${id}!`;
+            throw new Error(`'undefined' is not a valid value for setting: ${id}!`);
 
+        Log.debug(`Set value of setting "${id}" to: ${value}`)
         this.settings[id].value = value.toString();
+
+        if (save)
+            this.saveSettings();
     }
 
     reset(id: string){

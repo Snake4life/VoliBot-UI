@@ -49,6 +49,8 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
+    "@types/ion.rangeslider": "^2.0.29",
+    "@types/mousetrap": "^1.6.0",
     "animejs": "^2.2.0",
     "awesome-bootstrap-checkbox": "^0.3.7",
     "bootstrap": "^3.3.7",
@@ -65,10 +67,12 @@
     "datatables.net-select-bs": "^1.2.4",
     "font-awesome": "^4.7.0",
     "install": "^0.10.2",
-    "ion-rangeslider": "^2.1.6",
+    "ion-rangeslider": "^2.2.0",
+    "izitoast": "^1.2.0",
     "jquery-sparkline": "^2.4.0",
     "jquery.scrollbar": "^0.2.11",
     "morris.js": "^0.5.0",
+    "mousetrap": "^1.6.1",
     "npm": "^5.6.0",
     "popper.js": "^1.12.9",
     "raphael": "^2.2.7",

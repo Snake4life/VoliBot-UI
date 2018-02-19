@@ -1,20 +1,16 @@
-import { VoliBot } from '../VoliBot';
 import { LeagueAccount } from '../Models/LeagueAccount';
 import { IManager } from "./IManager";
+import { VoliBotManager, Log } from "./";
 
 export class AccountsManager implements IManager {
     initialize(){}
 
-    voliBots: VoliBot[];
-
-    constructor(voliBots?: VoliBot[]){
-        this.voliBots = voliBots || new Array<VoliBot>();
-    }
-
-    addAccount(account: LeagueAccount){
-        account;
-        //let orderedBots = this.voliBots.sort((a,b) => (a.ClientCount > b.ClientCount) ? 1 : ((b.ClientCount > a.ClientCount) ? -1 : 0));
-        //orderedBots[0].addAccount(account);
+    addAccount(account: LeagueAccount, onSuccess?: (account: LeagueAccount) => void, onFail?: (account: LeagueAccount) => void){
+        var instance = VoliBotManager.instanceWithLeastAccounts;
+        if (instance)
+            instance.addAccount(account, onSuccess, onFail);
+        else
+            Log.error(`Could not add account: No suitable VoliBots instances found.`)
     }
 }
 

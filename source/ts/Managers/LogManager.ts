@@ -8,10 +8,10 @@ class LogItem {
 }
 
 export enum LogLevel{
-    Debugging,
-    Info,
-    Warning,
-    Error
+    Debugging = "Debugging",
+    Info      = "Info",
+    Warning   = "Warning",
+    Error     = "Error"
 }
 
 export class LogManager implements IManager {
@@ -28,7 +28,7 @@ export class LogManager implements IManager {
     debug(data: any){
         this.logs.push({
             level: LogLevel.Debugging,
-            data: data.toString(),
+            data: JSON.stringify(data),
             time: new Date()
         } as LogItem);
         console.debug(data);
@@ -36,8 +36,8 @@ export class LogManager implements IManager {
 
     info(data: any){
         this.logs.push({
-            level: LogLevel.Debugging,
-            data: data.toString(),
+            level: LogLevel.Info,
+            data: JSON.stringify(data),
             time: new Date()
         } as LogItem);
         console.info(data);
@@ -45,8 +45,8 @@ export class LogManager implements IManager {
 
     warn(data: any){
         this.logs.push({
-            level: LogLevel.Debugging,
-            data: data.toString(),
+            level: LogLevel.Warning,
+            data: JSON.stringify(data),
             time: new Date()
         } as LogItem);
         console.warn(data);
@@ -54,7 +54,7 @@ export class LogManager implements IManager {
 
     error(message: string, error: Error = new Error()){
         this.logs.push({
-            level: LogLevel.Debugging,
+            level: LogLevel.Error,
             data: message + error.message.toString(),
             time: new Date(),
             stack: error.stack

@@ -1,48 +1,58 @@
 import { IManager } from './IManager';
+import { Log } from './';
+
 import { UiComponentBase } from '../UI/Components';
 import { ScreenBase } from '../UI/Screens';
+
 import { AnimeTimelineInstance } from 'animejs';
 import * as anime from 'animejs';
 
+import swal from 'sweetalert2';
+
 export class UiManager implements IManager {
     private components = new Array<UiComponentBase>();
-    private screens = new Array<ScreenBase>();
-    private currentScreen = -1;
+    private screens: { [id: string]: ScreenBase } = {};
+    private _currentScreen = "";
     private initialized = false;
 
-    get CurrentScreen() {
-        return this.currentScreen;
+    displayGoodbye = true;
+
+    get currentScreen() {
+        return this._currentScreen;
     }
 
-    set CurrentScreen(id: number) {
+    set currentScreen(id: string) {
         this.setCurrentScreen(id);
     }
 
-    setCurrentScreen(id: number): AnimeTimelineInstance;
+    setCurrentScreen(id: string): AnimeTimelineInstance;
     setCurrentScreen(screen: ScreenBase): AnimeTimelineInstance;
-    setCurrentScreen(inData: number | ScreenBase): AnimeTimelineInstance {
-        let oldId = this.currentScreen;
-        let id: number;
+    setCurrentScreen(inData: string | ScreenBase): AnimeTimelineInstance {
+        Log.debug(`Attempting to change active screen to: ${JSON.stringify(inData)}`);
 
-        if (typeof inData == "number")
-            id = inData as number;
+        let oldId = this.currentScreen;
+        let id: string;
+
+        if (typeof inData == "string")
+            id = inData as string;
         else if (inData instanceof ScreenBase) {
-            id = this.screens.indexOf(inData as ScreenBase);
-            if (id == -1)
+            let potentialId = Object.keys(this.screens).find(x => this.screens[x] == inData as ScreenBase);
+            if (potentialId == undefined)
                 throw new Error(`Screen ${inData} is not registered, call registerScreen first!`);
+            id = potentialId;
         }
         else
             throw new Error(`${typeof inData} is not a valid ScreenBase!`);
-        
 
-        if (id < 0 || id > this.screens.length || this.screens[id] == undefined)
-            throw new Error(`Screen with id ${id} does not exist!`);
+        if (this.screens[id] == undefined)
+            throw new Error(`Screen with id '${id}' does not exist!`);
 
-        this.currentScreen = id;
+        Log.debug(`Active screen change initialized: '${this.currentScreen}' => '${id}'.`);
+        this._currentScreen = id;
 
         let timeline = anime.timeline();
 
-        if (oldId != -1) {
+        if (oldId != "") {
             timeline.add({
                 targets: this.screens[oldId].rootElement,
                 translateY: '-110%',
@@ -51,27 +61,33 @@ export class UiManager implements IManager {
             });
         }
 
-        if (id != -1) {
+        if (id != "") {
             timeline.add({
                 targets: this.screens[id].rootElement,
                 translateY: '0%',
                 duration: 750,
                 easing: 'easeInOutQuart',
-                offset: '-=650'
+                offset: '-=650',
+                complete: () => {
+                    Log.info(`Active screen changed to: '${id}'.`);
+                }
             });
         }
 
         return timeline;
     }
 
+    //TODO: string id's?
     private registerComponent(component: UiComponentBase): number {
+        Log.debug("Registered UiComponentBase: " + JSON.stringify(component));
         if (this.initialized)
             throw new Error("Can not register UiComponentBase after initialization!");
 
         return this.components.push(component);
     }
 
-    registerScreen(screen: ScreenBase): number {
+    registerScreen(id: string, screen: ScreenBase) {
+        Log.debug("Registered screen: " + id);
         if (this.initialized)
             throw new Error("Can not register ScreenBase after initialization!");
 
@@ -81,51 +97,52 @@ export class UiManager implements IManager {
             duration: 0
         });
 
-        return this.screens.push(screen);
+        this.screens[id] = screen;
     }
 
-    unregisterScreen(id: number) {
+    unregisterScreen(id: string) {
+        Log.debug("Unegistered screen: " + id);
         delete this.screens[id];
     }
 
     initialize() {
-        console.log("Screens: ");
-        this.screens.forEach(uiElement => {
-            console.log(uiElement);
+        Log.debug("Hooking Screens: ");
+        Object.keys(this.screens).forEach(id => {
+            let uiElement = this.screens[id];
+            Log.debug(uiElement);
             uiElement.registerComponents(x => this.registerComponent(x))
             uiElement.hookUi();
         });
-        
-        console.log("Components: ");
+
+        Log.debug("Hooking Components: ");
         this.components.forEach(uiElement => {
-            console.log(uiElement);
+            Log.debug(uiElement);
             uiElement.hookUi();
         });
 
         this.initialized = true;
 
-        // window.addEventListener("beforeunload", () => {
-        // 	this.pageUnloading = true;
-        // 	if (this.showGoodbye) {
-        // 		anime({
-        // 			targets: ['#MainView', '#LoginView'],
-        // 			opacity: 0,
-        // 			duration: 125,
-        // 			easing: 'easeInOutSine'
-        // 		});
+        window.addEventListener("beforeunload", () => {
+        	if (this.displayGoodbye) {
+        		anime({
+        			targets: ['#MainView', '#LoginView'],
+        			opacity: 0,
+        			duration: 125,
+        			easing: 'easeInOutSine'
+        		});
 
-        // 		swal({
-        // 			title: 'Goodbye!',
-        // 			type: 'info',
-        // 			backdrop: false,
-        // 			showConfirmButton: false,
-        // 			allowOutsideClick: false,
-        // 			allowEscapeKey: false,
-        // 			allowEnterKey: false,
-        // 			onOpen: swal.hideLoading
-        // 		});
-        // 	}
-        // });
+        		swal({
+        			title: 'Goodbye!',
+        			type: 'info',
+        			backdrop: false,
+        			showConfirmButton: false,
+        			allowOutsideClick: false,
+        			allowEscapeKey: false,
+        			allowEnterKey: false,
+        			onOpen: swal.hideLoading
+        		});
+        	}
+        });
     }
 }
 

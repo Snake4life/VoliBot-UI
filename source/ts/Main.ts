@@ -1,8 +1,5 @@
-import { Log, UI, Notifications, Settings, Accounts, VoliBotManager } from './Managers';
-import { UiLogin } from './UI/Screens/Login';
-import * as $ from 'jquery';
 import swal from 'sweetalert2';
-
+import * as $ from 'jquery';
 window.onerror = function (_, __, ___, ____, error) {
     let crashId = uuidv4();
 
@@ -10,8 +7,6 @@ window.onerror = function (_, __, ___, ____, error) {
 
     //TODO: Handle this serverside somewhere
     Log.error("Uncaught Exception: ", error);
-
-    alert(Log.toJson());
 
     Notifications.fullscreenNotification({
         type: "error",
@@ -54,21 +49,25 @@ window.onerror = function (_, __, ___, ____, error) {
         onClose: () => {
             window.location.reload();
         }
-    });
+    }, true);
+
+    let crashData = {
+        crashId: crashId,
+        logs: Log.toJson(),
+        userAgent: navigator.userAgent
+    }
+
+    console.warn("Error info: ");
+    console.warn(crashData);
 
     //TODO: Add loading commands to Notifications, no other script should access swal.
     swal.showLoading();
-    $.post(
-        "/",
-        Log.toJson(),
-        () => swal.hideLoading()
-    )
+    $.post("/", crashData)
     .fail(() => swal.showValidationError("Could not automatically report the error.<br>Please follow the steps above if this happens more than once!"))
     .always(() => swal.hideLoading());
-
+    
     var suppressErrorAlert = false;
-    // If you return true, then error alerts (like in older versions of 
-    // Internet Explorer) will be suppressed.
+    // If you return true, then error alerts (like in older versions of Internet Explorer) will be suppressed.
     return suppressErrorAlert;
 
     function uuidv4() {
@@ -79,7 +78,12 @@ window.onerror = function (_, __, ___, ____, error) {
     }
 };
 
-UI.registerScreen(new UiLogin());
+import { Log, UI, Notifications, Settings, Accounts, VoliBotManager } from './Managers';
+import { ScreenLogin } from './UI/Screens/Login';
+import { ScreenMain } from './UI/Screens/Main';
+
+UI.registerScreen("Login", new ScreenLogin());
+UI.registerScreen("Main", new ScreenMain());
 
 Log.initialize();
 Settings.initialize();
@@ -87,3 +91,10 @@ Notifications.initialize();
 Accounts.initialize();
 VoliBotManager.initialize();
 UI.initialize();
+
+import * as Mousetrap from 'mousetrap';
+Mousetrap.bind('j+a+s+u', function() {
+    Mousetrap.unbind('j+a+s+u');
+    Log.info("Summoning manual crash: Jasu.");
+    eval("JasuJasuJasuJasuJasu");
+});

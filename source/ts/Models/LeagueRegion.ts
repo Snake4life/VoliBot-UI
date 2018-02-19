@@ -1,11 +1,11 @@
-export enum LeagueRegion {
-    EUNE,
-    EUW,
-    JP,
-    LA1,
-    LA2,
-    NA,
-    OC1,
-    RU,
-    TR,
+export enum LeagueRegion { 
+    EUNE = "EUNE",
+    EUW = "EUW",
+    JP = "JP",
+    LA1 = "LA1",
+    LA2 = "LA2",
+    NA = "NA",
+    OC1 = "OC1",
+    RU = "RU",
+    TR = "TR",
 }
