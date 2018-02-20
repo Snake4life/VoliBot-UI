@@ -4,7 +4,7 @@
 import * as $ from 'jquery';
 
 import { VoliBotManager } from '../../Managers';
-import { UiComponentBase } from './';
+import { ComponentBase } from './';
 import { VoliClient } from 'VoliClient';
 
 //#region Things you should probably avoid touching if you don't have a better solution.
@@ -20,7 +20,7 @@ require('datatables.net')(window, $);
 require('datatables.net-select')(window, $);
 //#endregion
 
-export class ComponentAccountsList extends UiComponentBase {
+export class ComponentAccountsList extends ComponentBase {
     private initializeDataTable() {
         let self = this;
         this.accountsTable = $('.datatable')
@@ -42,8 +42,6 @@ export class ComponentAccountsList extends UiComponentBase {
 			ordering: true,
 			lengthChange: true,
 			paging: false,
-			//paging: true,
-			//pagingType: 'simple_numbers',
 			select: {
 				style: 'os'
             },

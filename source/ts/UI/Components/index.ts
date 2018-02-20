@@ -1,5 +1,5 @@
 import { IUi } from '../';
 
-export abstract class UiComponentBase implements IUi {
+export abstract class ComponentBase implements IUi {
     abstract hookUi(): void;
 }

@@ -1,6 +1,5 @@
 import { IManager } from "./IManager";
 import { Notifications, Log } from "./";
-import anime from 'animejs';
 import * as $ from 'jquery';
 
 export class NewsManager implements IManager{
@@ -12,19 +11,19 @@ export class NewsManager implements IManager{
     updateWatcher: UrlWatcher;
     newsWatcher: UrlWatcher;
 
-    constructor(updateInterval: number){
-        this.updateWatcher = new UrlWatcher("/build-date.txt", updateInterval);
-        this.newsWatcher = new UrlWatcher("/news.json", updateInterval);0
+    constructor(updateIntervalMs: number){
+        this.updateWatcher = new UrlWatcher("/build-date.txt", updateIntervalMs);
+        this.newsWatcher = new UrlWatcher("/news.json", updateIntervalMs);
         
         this.updateWatcher.onNewData = this.displayUpdate;
         this.newsWatcher.onNewData = this.displayNews;
 
         this.updateWatcher.onError = (textStatus, errorThrown) => {
             Log.warn(`Failed to check for updates: ${textStatus}|${errorThrown}`);
-            Notifications.addNotification("updateWatcherOnError", "Failed to check for updates.", `Retrying in ${updateInterval/1000} seconds.`);
+            Notifications.addNotification("updateWatcherOnError", "Failed to check for updates.", `Retrying in ${updateIntervalMs/1000} seconds.`);
         }
         this.newsWatcher.onError = () => {
-            Notifications.addNotification("newsWatcherOnError", "Failed to retrieve news.", `Retrying in ${updateInterval/1000} seconds.`);
+            Notifications.addNotification("newsWatcherOnError", "Failed to retrieve news.", `Retrying in ${updateIntervalMs/1000} seconds.`);
         }
     }
 
@@ -32,14 +31,15 @@ export class NewsManager implements IManager{
         //TODO: Add a "news" component, then register that instance here somehow.
     }
 
-    displayUpdate(data: string){
-        let visual_date = / (.*) GMT/.exec(data)[1];
+    displayUpdate(date: string){
+        let regex = / (.*) GMT/.exec(date);
+        let visual_date: string = (regex == null) ? "Unknown" : regex[1];
         Notifications.addNotification("uiVersionUpdate", `There's a UI update available! (${visual_date})`, "Click here to update.<br>(The VoliBot Core will not restart)");
     }
 }
 
-class UrlWatcher{
-    private lastData: string;
+export class UrlWatcher{
+    private lastData: string = "";
     private url: string;
 
     forceCheck(){
@@ -52,7 +52,7 @@ class UrlWatcher{
                         this.onNewData(result as string);
                 }
             },
-            error: (jqXHR, textStatus, errorThrown) => {
+            error: (_jqXHR, textStatus, errorThrown) => {
                 // When an HTTP error occurs, errorThrown receives the textual portion of the HTTP status
                 if (this.onError != undefined)
                     this.onError(textStatus, errorThrown);
@@ -60,23 +60,27 @@ class UrlWatcher{
         });
     }
 
-    onNewData: (newVersion: string) => void;
-    onError: (errorType: JQuery.Ajax.ErrorTextStatus | string, httpError: string) => void;
+    onNewData: (newVersion: string) => void = () => {};
+    onError: (errorType: JQuery.Ajax.ErrorTextStatus | string, httpError: string) => void = () => {};
 
-    setInterval(updateCheckIntervalSeconds: number){
+    setInterval(updateCheckIntervalMs: number){
         if (this.interval != undefined)
             clearInterval(this.interval);
-        this.interval = setInterval(this.forceCheck, updateCheckIntervalSeconds);
+        this.interval = setInterval(this.forceCheck, updateCheckIntervalMs);
     }
 
     private interval: number;
-    constructor(url: string, updateCheckIntervalSeconds: number){
+    constructor(url: string, updateCheckIntervalMs: number){
+        this.url = url;
+        this.interval = updateCheckIntervalMs;
         $.ajax({
             url : this.url,
             success : (result) => {
                 this.lastData = result;
             }
         });
-        setInterval(updateCheckIntervalSeconds);
+        setInterval(updateCheckIntervalMs);
     }
 }
+
+export var News = new NewsManager(10 * 1000);

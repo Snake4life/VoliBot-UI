@@ -3,9 +3,9 @@ import { LeagueAccount } from '../../Models/LeagueAccount';
 import { LeagueRegion } from '../../Models/LeagueRegion';
 import { LeagueAccountSettings } from '../../Models/LeagueAccountSettings';
 import { Accounts, Log, Notifications } from '../../Managers';
-import { UiComponentBase } from './';
+import { ComponentBase } from './';
 
-export class ComponentAddAccount extends UiComponentBase {
+export class ComponentAddAccount extends ComponentBase {
     hookUi(): void {
         $("#AddAccount_Submit").click(this.doAddAccount);
     }

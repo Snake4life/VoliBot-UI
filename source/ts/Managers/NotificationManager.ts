@@ -1,6 +1,6 @@
 import { Log } from './LogManager';
 import { IManager } from "./IManager";
-import swal, { SweetAlertOptions } from 'sweetalert2';
+import swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
 import iziToast from 'izitoast';
 
 export { SweetAlertOptions as FullscreenNotification } from 'sweetalert2';
@@ -21,8 +21,9 @@ export class NotificationsManager implements IManager {
     closeFullscreenNotification(id: number): boolean {
         Log.debug("Attempting to close Fullscreen ID: " + id);
 
+        if (this.currentFullscreenId == undefined) return true;
         if (id != this.currentFullscreenId) {
-            Log.error("Invalid ID for closeFullscreenNotification!");
+            Log.debug("Invalid ID for closeFullscreenNotification: " + id + " instead of " + this.currentFullscreenId);
             return false;
         } else {
             this.currentFullscreenId = undefined;
@@ -31,7 +32,7 @@ export class NotificationsManager implements IManager {
         }
     }
 
-    fullscreenNotification(options: SweetAlertOptions, forceDisplay: boolean = false): number {
+    fullscreenNotification(options: SweetAlertOptions, forceDisplay: boolean = false): {id: number, result: Promise<SweetAlertResult>} {
         if (!this.currentFullscreenId || forceDisplay) {
             let close = options.onClose;
             options.onClose = x => {
@@ -39,10 +40,10 @@ export class NotificationsManager implements IManager {
                 this.currentFullscreenId = undefined;
             }
 
-            swal(options);
+            let result = swal(options);
             let id = Math.floor(Math.random() * Math.floor(1000));
             this.currentFullscreenId = id;
-            return id;
+            return { id: id, result: result };
         }
         else
             throw new Error("Fullscreen notification is already being shown!");
@@ -50,7 +51,7 @@ export class NotificationsManager implements IManager {
 
     addNotification(notificationId: string | null, title: string, message: string, timeout?: number, onClick?: () => void, iconClasses?: string) {
         if (notificationId != null){
-            if (!/[^a-zA-Z]/.test(notificationId)) {
+            if (!/[^a-z^A-Z]/.test(notificationId)) {
                 Log.error(`Invalid notificationId ([a-zA-Z] allowed): ${notificationId}`)
                 return;
             }

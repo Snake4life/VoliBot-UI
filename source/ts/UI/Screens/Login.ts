@@ -97,7 +97,7 @@ export class ScreenLogin extends ScreenBase {
 		// This hides it if you are immediately connected, but shows it if there's any issues or delays.
 		loadingTimeout = setTimeout(function () {
 			Log.debug("Connecting is not instant, showing 'Connecting' window.")
-			notificationId = Notifications.fullscreenNotification({
+			notificationId = (Notifications.fullscreenNotification({
 				title: 'Connecting to VoliBot',
 				type: 'info',
 				onOpen: swal.showLoading,
@@ -105,7 +105,7 @@ export class ScreenLogin extends ScreenBase {
 				allowEscapeKey: false,
 				allowEnterKey: false,
 				showConfirmButton: false
-			});
+			})).id;
 		}, 100);
 
 		let hostnames = hostname.split(",");

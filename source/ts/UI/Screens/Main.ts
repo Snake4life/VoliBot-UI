@@ -1,12 +1,12 @@
 import * as $ from 'jquery';
 
 import { ScreenBase } from '../Screens';
-import { UiComponentBase } from '../Components';
+import { ComponentBase } from '../Components';
 import { ComponentAddAccount } from '../Components/AddAccounts';
 import { ComponentAccountsList } from '../Components/AccountsList';
 
 export class ScreenMain extends ScreenBase {
-	registerComponents(register: (component: UiComponentBase) => void) { 
+	registerComponents(register: (component: ComponentBase) => void) { 
 		register(new ComponentAddAccount());
 		register(new ComponentAccountsList());
 	}

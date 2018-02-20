@@ -78,7 +78,7 @@ window.onerror = function (_, __, ___, ____, error) {
     }
 };
 
-import { Log, UI, Notifications, Settings, Accounts, VoliBotManager } from './Managers';
+import { Log, UI, Notifications, Settings, Accounts, VoliBotManager, News } from './Managers';
 import { ScreenLogin } from './UI/Screens/Login';
 import { ScreenMain } from './UI/Screens/Main';
 
@@ -88,13 +88,19 @@ UI.registerScreen("Main", new ScreenMain());
 Log.initialize();
 Settings.initialize();
 Notifications.initialize();
+News.initialize();
 Accounts.initialize();
 VoliBotManager.initialize();
 UI.initialize();
 
-import * as Mousetrap from 'mousetrap';
-Mousetrap.bind('j+a+s+u', function() {
-    Mousetrap.unbind('j+a+s+u');
-    Log.info("Summoning manual crash: Jasu.");
-    eval("JasuJasuJasuJasuJasu");
+import { Debugging } from './Debugging';
+
+Debugging.initialize({
+    Log: Log,
+    Settings: Settings,
+    Notifications: Notifications,
+    News: News,
+    Accounts: Accounts,
+    VoliBotManager: VoliBotManager,
+    UI: UI,
 });

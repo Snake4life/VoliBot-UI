@@ -4,7 +4,14 @@ class LogItem {
     time: Date;
     data: string;
     level: LogLevel;
-    stack: string;
+    stack: string | undefined;
+
+    constructor(time: Date, data: string, level: LogLevel, stack?: string){
+        this.time = time;
+        this.data = data;
+        this.level = level;
+        this.stack = stack;
+    }
 }
 
 export enum LogLevel{

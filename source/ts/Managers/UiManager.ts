@@ -1,7 +1,7 @@
 import { IManager } from './IManager';
 import { Log } from './';
 
-import { UiComponentBase } from '../UI/Components';
+import { ComponentBase } from '../UI/Components';
 import { ScreenBase } from '../UI/Screens';
 
 import { AnimeTimelineInstance } from 'animejs';
@@ -10,7 +10,7 @@ import * as anime from 'animejs';
 import swal from 'sweetalert2';
 
 export class UiManager implements IManager {
-    private components = new Array<UiComponentBase>();
+    private components = new Array<ComponentBase>();
     private screens: { [id: string]: ScreenBase } = {};
     private _currentScreen = "";
     private initialized = false;
@@ -78,7 +78,7 @@ export class UiManager implements IManager {
     }
 
     //TODO: string id's?
-    private registerComponent(component: UiComponentBase): number {
+    private registerComponent(component: ComponentBase): number {
         Log.debug("Registered UiComponentBase: " + JSON.stringify(component));
         if (this.initialized)
             throw new Error("Can not register UiComponentBase after initialization!");
