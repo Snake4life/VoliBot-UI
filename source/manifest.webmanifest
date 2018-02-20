@@ -1,0 +1,13 @@
+{
+  "name": "VoliBot",
+  "short_name": "VoliBot",
+  "start_url": ".",
+  "display": "fullscreen",
+  "background_color": "#fff",
+  "description": "VoliBot - A League Bot",
+  "icons": [{
+    "src": "img/face_logo.png",
+    "sizes": "128x128",
+    "type": "image/png"
+  }]
+}
