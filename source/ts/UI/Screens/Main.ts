@@ -1,16 +1,14 @@
 import * as $ from 'jquery';
-import swal from 'sweetalert2';
 
-import { Settings, UI, VoliBotManager } from '../../Managers';
 import { ScreenBase } from '../Screens';
-import { Notifications } from '../../Managers/NotificationManager';
-import { Log } from '../../Managers/LogManager';
 import { UiComponentBase } from '../Components';
-import { UiAddAccount } from '../Components/AddAccounts';
+import { ComponentAddAccount } from '../Components/AddAccounts';
+import { ComponentAccountsList } from '../Components/AccountsList';
 
 export class ScreenMain extends ScreenBase {
 	registerComponents(register: (component: UiComponentBase) => void) { 
-		register(new UiAddAccount())
+		register(new ComponentAddAccount());
+		register(new ComponentAccountsList());
 	}
 
 	rootElement: HTMLElement;

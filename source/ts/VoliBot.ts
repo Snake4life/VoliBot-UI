@@ -12,16 +12,17 @@ import { LeagueAccount } from './Models/LeagueAccount';
 
 export class VoliBot {
 	socket: WebSocket;
-
 	clients: { [id: string] : VoliClient } = { };
-	wsCallbacks: { [id: string] : (data: any) => void } = { };
+	private wsCallbacks: { [id: string] : (data: any, serverId: string) => void } = { };
+	serverId: string;
 
-	addCallbackHandler(id: string, handler: (data: any) => void) {
+	addCallbackHandler(id: string, handler: (data: any, serverId: string) => void) {
 		if (this.wsCallbacks[id]){
-			this.wsCallbacks[id] = (x) => {
-				this.wsCallbacks[id](x);
-				handler(x);
-			}
+			let originalCallback = this.wsCallbacks[id];
+			this.wsCallbacks[id] = (x, serverId) => {
+				originalCallback(x, serverId);
+				handler(x, serverId);
+			};
 		}else{
 			this.wsCallbacks[id] = handler;
 		}
@@ -32,17 +33,18 @@ export class VoliBot {
 	}
 
 	constructor(hostname: string, port: number, onOpen?: (bot: VoliBot, args?: any[]) => void, onClose?: (bot: VoliBot, args?: any[]) => void){
+		this.serverId = hostname;
 		this.socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
 
 		this.socket.onopen = (...args: any[]) => {
-			this.wsCallbacks["LoggingOut"] = this.onLoggingOut;
-			this.wsCallbacks["UpdateStatus"] = this.onUpdateStatus;
-			this.wsCallbacks["ListInstance"] = this.onListInstance;
-			this.wsCallbacks["UpdatePhase"] = this.onUpdatePhase;
+			this.addCallbackHandler("LoggingOut",   (data) => this.onLoggingOut(data));
+			this.addCallbackHandler("UpdateStatus", (data) => this.onUpdateStatus(data));
+			this.addCallbackHandler("ListInstance", (data) => this.onListInstance(data));
+			this.addCallbackHandler("UpdatePhase",  (data) => this.onUpdatePhase(data));
 
 			if (onOpen != undefined)
 				onOpen(this, ...args);
-				
+			
 			this.send("RequestInstanceList", "", () => {});
 		};
 
@@ -59,10 +61,10 @@ export class VoliBot {
 			var data = JSON.parse(event.data);
 			Log.debug("Received data: " + JSON.stringify(data));
 			if ((data[0] == MessageType.RESPONSE_ERROR || data[0] == MessageType.RESPONSE_SUCCESS) && this.wsCallbacks[data[1]] != null)
-				this.wsCallbacks[data[1]].call(this, data);
+				this.wsCallbacks[data[1]].call(this, data, this.serverId);
 
 			if (data[0] == MessageType.EVENT && this.wsCallbacks[data[1]] != null)
-				this.wsCallbacks[data[1]].call(this, data);
+				this.wsCallbacks[data[1]].call(this, data, this.serverId);
 		}
 	}
 
@@ -105,11 +107,11 @@ export class VoliBot {
 	//#endregion
 
 	//#region Websocket event handlers
-	onLoggingOut(data: any){
+	private onLoggingOut(data: any){
 		data;
 	}
 
-	onUpdateStatus(data: any){
+	private onUpdateStatus(data: any){
 		if (this.clients[data[2].id] === null)
 		{
 			Log.warn("Recieved status for client we were not aware existed!");
@@ -123,19 +125,19 @@ export class VoliBot {
 		//TODO: Update UI
 	}
 
-	onListInstance(data: any){
+	private onListInstance(data: any){
 		Log.debug(data);
 		let allClients = data[2].List as VoliClient[];
 		if (allClients == null) return;
 
 		allClients.forEach((x) => {
-			if (x != null)
-				this.clients[x.id] = x;
+			if (x == null) return;
+			this.clients[x.id] = x;
 		}, this);
 		//TODO: Refresh UI
 	}
 
-	onUpdatePhase(data: any){
+	private onUpdatePhase(data: any){
 		Log.debug(this);
 		this.send("RequestInstanceList", "", () => {});
 

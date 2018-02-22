@@ -1,7 +1,7 @@
 import { LeagueRegion } from '../Models/LeagueRegion';
 import { LeagueAccountSettings } from '../Models/LeagueAccountSettings';
 
-export class LeagueAccount{
+export class LeagueAccount {
     username: string;
     password: string;
     region: LeagueRegion;

@@ -1,11 +1,40 @@
 import { VoliBot } from '../VoliBot';
+import { VoliClient } from 'VoliClient';
 
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass{
     private voliBotInstances: VoliBot[] = new Array<VoliBot>();
+	private defaultWsCallbacks: { [id: string] : (data: any, serverId: string) => void } = { };
+
     initialize(){
 
     }
+
+    getAllClients(){
+        let clients: { [id: string] : VoliClient } = {};
+
+        this.voliBotInstances.forEach(x => {
+            if (x.clients == null) return;
+            Object.keys(x.clients).forEach(key => {
+                clients[x.socket.url + key] = x.clients[key];
+            });
+        });
+
+        return clients;
+    }
+
+    addCallbackHandler(id: string, handler: (data: any, serverId: string) => void) {
+        this.do(x => x.addCallbackHandler(id, handler));
+		if (this.defaultWsCallbacks[id]){
+            let originalCallback = this.defaultWsCallbacks[id];
+			this.defaultWsCallbacks[id] = (x, serverId) => function(bot: VoliBot, serverId: string) {
+				originalCallback(bot, serverId);
+				handler(bot, serverId);
+			}.call(this, x, serverId);
+		}else{
+            this.defaultWsCallbacks[id] = handler;
+		}
+	}
 
     do(x: (voliBotInstance: VoliBot) => void){
         this.voliBotInstances.forEach(x);
@@ -27,13 +56,16 @@ export class VoliBotManagerClass{
     async addVoliBotInstance(url: string, port: number) {
         return new Promise<boolean>(resolve => {
             try{
-                this.voliBotInstances.push(new VoliBot(url, port, x => {
+                let voliBot = new VoliBot(url, port, x => {
                     resolve(true);
                     this.onVoliBotOpen(x);
                 }, (x, y) => {
                     resolve(false);
                     this.onVoliBotClose(x, y);
-                }));
+                })
+
+                Object.keys(this.defaultWsCallbacks).forEach(key => voliBot.addCallbackHandler(key, this.defaultWsCallbacks[key]));
+                this.voliBotInstances.push(voliBot);
             }
             catch(e){
                 resolve(false);
