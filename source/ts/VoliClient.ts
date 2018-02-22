@@ -2,6 +2,7 @@ import { LolSummonerSummoner } from "./Models/League/LolSummonerSummoner";
 import { LolStoreWallet } from "./Models/League/LolStoreWallet";
 
 export class VoliClient {
+    serverId: string;
     id: number;
     settings: VoliClientSettings;
     status: string;

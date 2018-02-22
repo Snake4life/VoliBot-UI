@@ -1,10 +1,6 @@
 import * as $ from 'jquery';
-import swal from 'sweetalert2';
 
-import { Settings, UI, VoliBotManager } from '../../Managers';
 import { ScreenBase } from '../Screens';
-import { Notifications } from '../../Managers/NotificationManager';
-import { Log } from '../../Managers/LogManager';
 import { UiComponentBase } from '../Components';
 import { ComponentAddAccount } from '../Components/AddAccounts';
 import { ComponentAccountsList } from '../Components/AccountsList';

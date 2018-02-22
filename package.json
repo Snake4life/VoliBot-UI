@@ -50,6 +50,7 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
+    "@types/datatables.net-select": "^1.2.3",
     "@types/ion.rangeslider": "^2.0.29",
     "@types/mousetrap": "^1.6.0",
     "animejs": "^2.2.0",

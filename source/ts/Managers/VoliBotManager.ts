@@ -1,26 +1,38 @@
 import { VoliBot } from '../VoliBot';
+import { VoliClient } from 'VoliClient';
 
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass{
     private voliBotInstances: VoliBot[] = new Array<VoliBot>();
-	private defaultWsCallbacks: { [id: string] : (data: any) => void } = { };
+	private defaultWsCallbacks: { [id: string] : (data: any, serverId: string) => void } = { };
 
     initialize(){
 
     }
 
-    addCallbackHandler(id: string, handler: (data: any) => void) {
-        //HERE
+    getAllClients(){
+        let clients: { [id: string] : VoliClient } = {};
+
+        this.voliBotInstances.forEach(x => {
+            if (x.clients == null) return;
+            Object.keys(x.clients).forEach(key => {
+                clients[x.socket.url + key] = x.clients[key];
+            });
+        });
+
+        return clients;
+    }
+
+    addCallbackHandler(id: string, handler: (data: any, serverId: string) => void) {
+        this.do(x => x.addCallbackHandler(id, handler));
 		if (this.defaultWsCallbacks[id]){
-			this.defaultWsCallbacks[id] = (x) => {
-				this.defaultWsCallbacks[id](x);
-				handler(x);
-			};
+            let originalCallback = this.defaultWsCallbacks[id];
+			this.defaultWsCallbacks[id] = (x, serverId) => function(bot: VoliBot, serverId: string) {
+				originalCallback(bot, serverId);
+				handler(bot, serverId);
+			}.call(this, x, serverId);
 		}else{
             this.defaultWsCallbacks[id] = handler;
-            this.do(x => {
-                x.addCallbackHandler(id, handler);
-            });
 		}
 	}
 
@@ -52,11 +64,7 @@ export class VoliBotManagerClass{
                     this.onVoliBotClose(x, y);
                 })
 
-                Object.keys(this.defaultWsCallbacks).forEach(key => {
-                    //HERE
-                    voliBot.addCallbackHandler(key, this.defaultWsCallbacks[key]);
-                })
-
+                Object.keys(this.defaultWsCallbacks).forEach(key => voliBot.addCallbackHandler(key, this.defaultWsCallbacks[key]));
                 this.voliBotInstances.push(voliBot);
             }
             catch(e){
