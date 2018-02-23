@@ -1,4 +1,4 @@
-export enum LeagueRegion { 
+export enum LeagueRegion {
     EUNE = "EUNE",
     EUW = "EUW",
     JP = "JP",

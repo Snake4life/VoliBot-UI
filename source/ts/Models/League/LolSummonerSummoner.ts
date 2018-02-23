@@ -1,4 +1,4 @@
-import { LolSummonerSummonerRerollPoints } from './LolSummonerSummonerRerollPoints'
+import { LolSummonerSummonerRerollPoints } from "./LolSummonerSummonerRerollPoints";
 
 export class LolSummonerSummoner {
     accountId: number;
@@ -7,7 +7,7 @@ export class LolSummonerSummoner {
     lastSeasonHighestRank: string;
     percentCompleteForNextLevel: number;
     profileIconId: number;
-    puuid: string; 
+    puuid: string;
     rerollPoints: LolSummonerSummonerRerollPoints;
     summonerId: number;
     summonerLevel: number;
@@ -27,14 +27,14 @@ export class LolSummonerSummoner {
         summonerLevel: number,
         xpSinceLastLevel: number,
         xpUntilNextLevel: number,
-    ){
+    ) {
         this.accountId = accountId;
         this.displayName = displayName;
         this.internalName = internalName;
         this.lastSeasonHighestRank = lastSeasonHighestRank;
         this.percentCompleteForNextLevel = percentCompleteForNextLevel;
         this.profileIconId = profileIconId;
-        this.puuid = puuid
+        this.puuid = puuid;
         this.rerollPoints = rerollPoints;
         this.summonerId = summonerId;
         this.summonerLevel = summonerLevel;

@@ -1,0 +1,15 @@
+{
+    "extends": "tslint:latest",
+    "rules": {
+        "adjacent-overload-signatures": true,
+        "member-access": [true, "no-public"],
+        "no-empty-interface": true,
+        "comment-format": [true, "check-uppercase", {"ignore-words": ["TODO", "HACK", "WARNING", "NOTE"]}],
+        "object-literal-key-quotes": [true, "as-needed"],
+        "quotemark": [true, "double", "avoid-escape", "avoid-template"],
+        "variable-name": [true, "check-format", "allow-leading-underscore", "allow-pascal-case"],
+        "arrow-return-shorthand": [true, "multiline"],
+        "no-implicit-dependencies": [true, "dev"],
+        "no-this-assignment": [true, {"allowed-names": ["^self$"], "allow-destructuring": true}]
+    }
+}

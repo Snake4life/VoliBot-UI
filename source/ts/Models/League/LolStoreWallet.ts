@@ -4,8 +4,8 @@ export class LolStoreWallet {
 
     constructor(
         ip: number,
-        rp: number
-    ){
+        rp: number,
+    ) {
         this.ip = ip;
         this.rp = rp;
     }

@@ -10,8 +10,8 @@ export class LolSummonerSummonerRerollPoints {
         currentPoints: number,
         numberOfRolls: number,
         maxRolls: number,
-        pointsCostToRoll: number
-    ){
+        pointsCostToRoll: number,
+    ) {
         this.pointsToReroll = pointsToReroll;
         this.currentPoints = currentPoints;
         this.numberOfRolls = numberOfRolls;

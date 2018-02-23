@@ -1,5 +1,5 @@
-import { IUi } from '../';
-import { ComponentBase } from '../Components';
+import { IUi } from "../";
+import { ComponentBase } from "../Components";
 
 export abstract class ScreenBase implements IUi {
     abstract rootElement: HTMLElement;

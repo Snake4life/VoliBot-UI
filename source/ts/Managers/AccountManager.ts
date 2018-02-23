@@ -1,17 +1,19 @@
-import { LeagueAccount } from '../Models/LeagueAccount';
-import { IManager } from "./IManager";
-import { VoliBotManager, Log } from "./";
+import { LeagueAccount } from "../Models/LeagueAccount";
+import { Log, VoliBotManager } from "./";
+import { Manager } from "./Manager";
 
-export class AccountsManager implements IManager {
-    initialize(){}
-
-    addAccount(account: LeagueAccount, onSuccess?: (account: LeagueAccount) => void, onFail?: (account: LeagueAccount) => void){
-        var instance = VoliBotManager.instanceWithLeastAccounts;
-        if (instance)
+export class AccountsManager extends Manager {
+    addAccount(
+        account: LeagueAccount,
+        onSuccess?: (account: LeagueAccount) => void,
+        onFail?: (account: LeagueAccount) => void): void {
+        const instance = VoliBotManager.instanceWithLeastAccounts;
+        if (instance) {
             instance.addAccount(account, onSuccess, onFail);
-        else
-            Log.error(`Could not add account: No suitable VoliBots instances found.`)
+        } else {
+            Log.error("Could not add account: No suitable VoliBots instances found.");
+        }
     }
 }
 
-export var Accounts = new AccountsManager();
+export const Accounts = new AccountsManager();

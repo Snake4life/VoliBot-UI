@@ -1,12 +1,19 @@
-import { Log } from './LogManager';
-import { IManager } from "./IManager";
-import swal, { SweetAlertOptions, SweetAlertResult } from 'sweetalert2';
-import iziToast from 'izitoast';
+//NOTE:
+// This file will throw two errors related to iziToast.
+// Ignore them, it's the typings for it that's wrong, iziToast is used correctly here.
 
-export { SweetAlertOptions as FullscreenNotification } from 'sweetalert2';
+//TODO: Fix iziToast typings?
 
-export class NotificationsManager implements IManager {
-    initialize(): void { }
+import * as $ from "jquery";
+import { Log } from "./LogManager";
+import { Manager } from "./Manager";
+
+import swal, { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
+export { SweetAlertOptions as FullscreenNotification } from "sweetalert2";
+
+import * as iziToast from "izitoast";
+
+export class NotificationsManager extends Manager {
     private _currentFullscreenId: number | undefined = undefined;
 
     private get currentFullscreenId() {
@@ -21,9 +28,9 @@ export class NotificationsManager implements IManager {
     closeFullscreenNotification(id: number): boolean {
         Log.debug("Attempting to close Fullscreen ID: " + id);
 
-        if (this.currentFullscreenId == undefined) return true;
-        if (id != this.currentFullscreenId) {
-            Log.debug("Invalid ID for closeFullscreenNotification: " + id + " instead of " + this.currentFullscreenId);
+        if (this.currentFullscreenId === undefined) { return true; }
+        if (id !== this.currentFullscreenId) {
+            Log.warn("Invalid ID for closeFullscreenNotification: " + id + " instead of " + this.currentFullscreenId);
             return false;
         } else {
             this.currentFullscreenId = undefined;
@@ -32,63 +39,83 @@ export class NotificationsManager implements IManager {
         }
     }
 
-    fullscreenNotification(options: SweetAlertOptions, forceDisplay: boolean = false): {id: number, result: Promise<SweetAlertResult>} {
+    fullscreenNotification(
+        options: SweetAlertOptions,
+        forceDisplay: boolean = false): {id: number, result: Promise<SweetAlertResult>} {
         if (!this.currentFullscreenId || forceDisplay) {
-            let close = options.onClose;
-            options.onClose = x => {
-                close && close(x);
+            const close = options.onClose;
+            options.onClose = (x) => {
+                if (close !== undefined) {
+                    close(x);
+                }
                 this.currentFullscreenId = undefined;
-            }
+            };
 
-            let result = swal(options);
-            let id = Math.floor(Math.random() * Math.floor(1000));
+            const result = swal(options);
+            const id = Math.floor(Math.random() * Math.floor(1000));
             this.currentFullscreenId = id;
-            return { id: id, result: result };
-        }
-        else
+            return { id, result };
+        } else {
             throw new Error("Fullscreen notification is already being shown!");
+        }
     }
 
-    addNotification(notificationId: string | null, title: string, message: string, timeout?: number, onClick?: () => void, iconClasses?: string) {
-        if (notificationId != null){
-            if (!/[^a-z^A-Z]/.test(notificationId)) {
-                Log.error(`Invalid notificationId ([a-zA-Z] allowed): ${notificationId}`)
+    addNotification(
+        notificationId: string | null,
+        title: string,
+        message: string,
+        timeout?: number,
+        onClick?: () => void,
+        iconClasses?: string) {
+        let toastId: string | undefined = `toast_${notificationId || "none"}`;
+
+        if (notificationId != null) {
+            if (/[^a-z^A-Z]/.test(notificationId)) {
+                Log.error(`Invalid notificationId ([a-zA-Z] allowed): ${notificationId}`);
                 return;
             }
-            notificationId = `toast_${notificationId}`;
-    
-            let oldNotification = $(`#${notificationId}`);
+
+            const oldNotification = document.getElementById(toastId);
             if (oldNotification) {
+                // tslint:disable-next-line:max-line-length
                 Log.info(`Notification with notificationId '${notificationId}' already exists, closing it before opening a new notification.`);
-                this.closeNotification(notificationId, displayNotification);
-            }else{
-                displayNotification();
+                this.closeNotification(notificationId, () => displayNotification.call(this));
+            } else {
+                displayNotification.call(this);
             }
+        } else {
+            toastId = undefined;
+            displayNotification.call(this);
         }
 
-        function displayNotification(){
+        function displayNotification() {
             iziToast.show({
-                id: "notificationId",
+                icon: iconClasses,
+                id: toastId,
                 layout: 2,
                 message: `<strong>${title}</strong><br>${message}`,
-                theme: 'dark',
+                theme: "dark",
                 timeout: timeout || false,
-                icon: iconClasses
             });
-    
-            if (onClick)
-                $(`#toast_${notificationId} > .iziToast-body`).on('click', onClick);
+
+            if (onClick) {
+                $(`#toast_${notificationId} > .iziToast-body`).on("click", onClick);
+            }
         }
     }
 
-    closeNotification(notificationId: string, onClosed?: () => void){
-        let notification = document.querySelector(`#toast_${notificationId}`);
+    closeNotification(notificationId: string, onClosed?: () => void) {
+        const notifications = document.querySelectorAll(`#toast_${notificationId}`);
 
-        if (notification instanceof HTMLDivElement)
-            iziToast.hide({message: "", transitionOut: 'fadeOutRight', onClosed: onClosed}, notification, "closeNotification");
-        else
-            Log.warn(`Tried to close non-existant notification with notificationId: ${notificationId}`);
+        notifications.forEach((notification) => {
+            if (notification instanceof HTMLDivElement) {
+                // tslint:disable-next-line:max-line-length
+                iziToast.hide(notification, {message: "", transitionOut: "fadeOutRight", onClosed}, "closeNotification");
+            } else {
+                Log.warn(`Tried to close non-existant notification with notificationId: ${notificationId}`);
+            }
+        }, this);
     }
 }
 
-export var Notifications = new NotificationsManager();
+export const Notifications = new NotificationsManager();

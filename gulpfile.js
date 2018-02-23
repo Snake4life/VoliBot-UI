@@ -51,7 +51,7 @@ var path = {
 
 function updateBuildDate() {
 	try { fs.mkdirSync(path.dist.other); } catch(e) {} // If the folder doesn't exist, create it.
-	fs.writeFileSync(path.dist.other + 'build-date.txt', new Date());
+	fs.writeFileSync(path.dist.other + 'build-date.txt', Date.now());
 }
 
 gulp.task('pug:build', function () {
@@ -73,8 +73,8 @@ gulp.task('ts:build', function () {
         packageCache: {}
 	})
 	.plugin(tsify)
-	.on('error', function (error) { console.error(error.toString()); })
 	.transform(babelify, { "extensions": [".js", ".ts"] })
+	.on('error', function (error) { console.error(error.toString()); })
 	.bundle()
 	.on('error', function (error) { console.error(error.toString()); })
 	.pipe(source('bundle.js'))
@@ -160,7 +160,7 @@ gulp.task('webserver', function() {
     .pipe(webserver({
 		port: process.env.PORT || 8080,
 		livereload: false,
-		host: process.env.IP || "127.0.0.1",
+		host: process.env.IP || "0.0.0.0",
     	open: true
     }));
 });

@@ -1,46 +1,46 @@
-import { Log, Notifications } from '../Managers';
-import * as Mousetrap from 'mousetrap';
+import * as Mousetrap from "mousetrap";
+import { Log, Notifications } from "../Managers";
 
 export class DebuggingClass {
     context: any = {};
 
-    initialize(context?: any){
+    initialize(context?: any) {
         this.context = {
             ...this.context,
             ...context,
-        }
+        };
 
-        Mousetrap.bind('ctrl+shift+enter', async () => {
+        Mousetrap.bind("ctrl+shift+enter", async () => {
             Log.warn("Opening debug menu!");
 
-            let notification = Notifications.fullscreenNotification({
-                title: "Enter a command: ",
+            const notification = Notifications.fullscreenNotification({
                 allowEnterKey: false,
                 input: "text",
+                title: "Enter a command: ",
             }, true);
 
-            let input = await notification.result;
-            if (input.dismiss) return;
+            const input = await notification.result;
+            if (input.dismiss) { return; }
 
             Log.info("Entered debug command: " + input.value);
             let output: any | undefined;
 
-            try{
+            try {
                 output = eval.call(this.context, `(${input.value})`);
-            }catch(e){
+            } catch (e) {
                 output = (e as Error).message;
             }
 
             Notifications.closeFullscreenNotification(notification.id);
             Notifications.fullscreenNotification({
+                text: typeof(output) === "string" ? output : JSON.stringify(output),
                 title: "Return value: ",
-                text: typeof(output) == "string" ? output : JSON.stringify(output)
-            })
+            });
         });
     }
 }
 
-let debugging = new DebuggingClass();
+const debugging = new DebuggingClass();
 
 debugging.context.jasu =
 debugging.context.crash = () => {

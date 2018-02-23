@@ -1,9 +1,9 @@
 export default class HostData {
-	url: string;
-	port: number;
+    url: string;
+    port: number;
 
-	constructor(url: string, port: number){
-		this.url = url;
-		this.port = port;
-	}
+    constructor(url: string, port: number) {
+        this.url = url;
+        this.port = port;
+    }
 }
