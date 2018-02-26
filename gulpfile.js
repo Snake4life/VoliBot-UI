@@ -57,7 +57,8 @@ function updateBuildDate() {
 gulp.task('pug:build', function () {
 	gulp.src(path.source.pug)
 		.pipe(pug({ pretty: true, locals: { metrika: false } }))
-		.pipe(gulp.dest(path.dist.html));
+		.on('error', function (error) { console.error(error.toString()); })
+		.pipe(gulp.dest(path.dist.html))
 
 	updateBuildDate();
 });

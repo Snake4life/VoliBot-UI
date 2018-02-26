@@ -34,24 +34,43 @@ export class ComponentAccountsList extends ComponentBase {
     }
 
     updateAccountsList(clientsObject: {[id: string]: VoliClient}, serverId: string) {
-        const clients = clientsObject == null ? [] : Object.keys(clientsObject).map((key) => clientsObject[key]);
+        const incomingClients = clientsObject == null ? [] :
+            Object.keys(clientsObject)
+                  .map((key) => clientsObject[key])
+                  .filter((x) => x !== null);
 
-        const updateClients: VoliClient[] = [];
-
-        if (clients == null) {
+        if (incomingClients == null) {
             this.accountsTable.clear();
             return;
         }
 
-        clients.forEach((x) => {
-            if (x == null || x.summoner == null) { return; }
+        const currentClients: VoliClient[] = Array.from(this.accountsTable.rows(
+            (_index: number, data: VoliBot) => (data.serverId === serverId),
+        ).data());
 
-            x.serverId = serverId;
-            updateClients.push(x);
-        }, this);
+        const updatedClients: VoliClient[] = [];
+        const newClients: VoliClient[] = [];
 
-        this.accountsTable.rows((_index: number, data: VoliBot) =>
-            (data.serverId === serverId)).remove().rows.add(updateClients).draw();
+        for (const i of incomingClients) {
+            if (currentClients.filter((x) => x.id === i.id).length > 0) {
+                updatedClients.push(i);
+            } else {
+                i.serverId = serverId;
+                newClients.push(i);
+            }
+        }
+
+        const removedClients: number[] = currentClients.filter((x) => incomingClients.indexOf(x) !== -1)
+                                                       .map((x) => x.id);
+
+        this.accountsTable
+            .rows((_index: number, data: VoliClient) =>
+                data.serverId === serverId &&
+                removedClients.indexOf(data.id) !== -1)
+            .remove()
+            .rows
+            .add(newClients)
+            .draw();
     }
 
     private initializeDataTable() {
@@ -61,21 +80,22 @@ export class ComponentAccountsList extends ComponentBase {
                     targets: 1,
                     render(data: VoliClientLevel, type) {
                         if (type === "display" || type === "filter") {
-                            return `${data.level} (+${data.percent}%)`;
+                            // Make sure the percentage is never "100%". Mostly because it looks bad :)
+                            return `${data.level} (+${Math.min(data.percent, 99)}%)`;
                         }
-                        // Makes sure the percentage is never "100%". Mostly because it looks bad :)
-                        return data.level + (Math.min(data.percent, 99) / 100);
+
+                        return data.level + (data.percent / 100);
                     },
                 },
             ],
             columns: [
-                { data: (x: VoliClient) => x.serverId || "Unknown" },
+                { data: (x: VoliClient) => x.serverId != null ? x.serverId : "Unknown" },
                 { data: (x: VoliClient) => new VoliClientLevel(x) },
-                { data: (x: VoliClient) => x.summoner.displayName },
-                { data: (x: VoliClient) => x.status },
-                { data: (x: VoliClient) => x.summoner.summonerId },
-                { data: (x: VoliClient) => x.wallet.ip },
-                { data: (x: VoliClient) => x.wallet.rp },
+                { data: (x: VoliClient) => x.summoner != null ? x.summoner.displayName : "Loading..." },
+                { data: (x: VoliClient) => x.status   != null ? x.status               : "Loading..." },
+                { data: (x: VoliClient) => x.summoner != null ? x.summoner.summonerId  : "Loading..." },
+                { data: (x: VoliClient) => x.wallet   != null ? x.wallet.ip            : "Loading..." },
+                { data: (x: VoliClient) => x.wallet   != null ? x.wallet.rp            : "Loading..." },
             ],
             language: {
                 info: "Registered accounts: _TOTAL_",
@@ -86,6 +106,7 @@ export class ComponentAccountsList extends ComponentBase {
                 },
             },
             lengthChange: true,
+            order: [[ 1, "desc" ]],
             ordering: true,
             paging: false,
             select: {

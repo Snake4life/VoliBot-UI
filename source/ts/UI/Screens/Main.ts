@@ -1,4 +1,8 @@
+// tslint:disable-next-line:no-reference
+/// <reference path="../../@types/jquery.scrollable.d.ts" />
+
 import * as $ from "jquery";
+import "jquery.scrollbar";
 
 import { ComponentBase } from "../Components";
 import { ComponentAccountsInfo } from "../Components/AccountsInfo";
@@ -28,7 +32,6 @@ export class ScreenMain extends ScreenBase {
 
     hookUi() {
         quickmenu($(".quickmenu__item.active"));
-
         $("body").on("click", ".quickmenu__item", function() {
             quickmenu($(this));
         });
@@ -41,38 +44,12 @@ export class ScreenMain extends ScreenBase {
             menu.eq(0).css("margin-left", "-" + item.index() * 200 + "px");
         }
 
-        $(".sidebar li").on("click", function(e) {
-            e.stopPropagation();
-            const secondNav = $(this).find(".collapse").first();
-            if (secondNav.length) {
-                //.secondNav.collapse('toggle');
-                $(this).toggleClass("opened");
-            }
-        });
-
-        //$('body.main-scrollable .main__scroll').scrollbar();
-        //$('.scrollable').scrollbar({'disableBodyScroll' : true});
-        $(window).on("resize", () => {
-            //$('body.main-scrollable .main__scroll').scrollbar();
-            //$('.scrollable').scrollbar({'disableBodyScroll' : true});
-        });
-
-        // tslint:disable-next-line:max-line-length
-        //$('.selectize-dropdown-content').addClass('scrollable scrollbar-macosx').scrollbar({'disableBodyScroll' : true});
-        //$('.nav-pills, .nav-tabs').tabdrop();
+        $("body.main-scrollable .main__scroll").scrollbar();
+        $(".scrollable").scrollbar({disableBodyScroll : true});
+        $(".selectize-dropdown-content").addClass("scrollable scrollbar-macosx").scrollbar({disableBodyScroll : true});
 
         $("body").on("click", ".header-navbar-mobile__menu button", () => {
             $(".dashboard").toggleClass("dashboard_menu");
         });
-
-        //$("input.bs-switch").bootstrapSwitch();
-
-        //$('.settings-slider').ionRangeSlider({decorate_both: false});
-
-        if ($("input[type=number]").length) {
-            //.$('input[type=number]').inputNumber({
-            //.    mobile: false
-            //.});
-        }
     }
 }

@@ -9,14 +9,16 @@ export class VoliBotManagerClass {
     initialize() { /* */ }
 
     getAllClients() {
-        const clients: { [id: string]: VoliClient } = {};
+        const clients: VoliClient[] = [];
 
         this.voliBotInstances.forEach((x) => {
             if (x.clients == null) {
                 return;
             }
+
             Object.keys(x.clients).forEach((key) => {
-                clients[x.socket.url + key] = x.clients[key];
+                x.clients[key].serverId = x.serverId;
+                clients.push(x.clients[key]);
             });
         });
 

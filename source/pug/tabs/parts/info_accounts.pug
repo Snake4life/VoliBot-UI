@@ -1,14 +1,38 @@
-.panel.panel-info
+.panel.panel-info.accounts-preview__selected
     .panel-heading
-        h3.panel-title Account Info
-    .st-widget
-        .st-widget__cont
-            .accounts-preview__props.accounts-preview__no_selected
-                .accounts-preview__prop
-                    span No account selected
-            .accounts-preview__props.accounts-preview__selected
-                .accounts-preview__prop
-                    span.accounts-preview__selected_accounts
-                .container-fluid
-                    .row
+        h3.panel-title Account Actions
+    .panel-body
+        .accounts-preview__props
+            .container-fluid
+                .row
+                    .form-group
+                        .accounts-preview__prop
+                            span.accounts-preview__selected_accounts
+                .row
+                    .form-group
                         button.btn.btn-primary.btn-block.accounts-preview__extract Extract to accounts.txt
+
+.panel.panel-info.accounts-preview__no_selected#AddAccount
+    .panel-heading
+        h3.panel-title Add Account
+    .panel-body
+        .form-group
+            .input-group
+                .input-group-addon
+                    i.fa.fa-user
+                input.form-control.AddAccount_Username(type="text", placeholder="Username", data-lpignore="true")
+        .form-group
+            .input-group
+                .input-group-addon
+                    i.fa.fa-unlock-alt
+                input.form-control.AddAccount_Password(type="password", placeholder="Password", data-lpignore="true")
+        include ./parts/account_settings.pug
+        .form-group
+            button.btn.btn-primary.btn-block.AddAccount_Add Add Account
+.panel.panel-orange.accounts-preview__selected#EditAccount
+    .panel-heading
+        h3.panel-title Account Settings
+    .panel-body
+        include ./parts/account_settings.pug
+        .form-group
+            button.btn.btn-danger.btn-block.accounts-preview__extract Save Changes
