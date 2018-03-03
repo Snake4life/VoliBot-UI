@@ -1,28 +1,30 @@
+import { LeagueAccount } from "../Models/LeagueAccount";
 import { VoliBot } from "../VoliBot";
-import { VoliClient } from "../VoliClient";
 
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass {
     private voliBotInstances: VoliBot[] = new Array<VoliBot>();
     private defaultWsCallbacks: { [id: string]: (data: any, serverId: string) => void } = { };
+    private newVoliBotCore: (core: VoliBot) => void = (() => { /* */ });
 
     initialize() { /* */ }
 
     getAllClients() {
-        const clients: VoliClient[] = [];
+        const clients: LeagueAccount[] = [];
 
         this.voliBotInstances.forEach((x) => {
-            if (x.clients == null) {
-                return;
-            }
-
-            Object.keys(x.clients).forEach((key) => {
-                x.clients[key].serverId = x.serverId;
-                clients.push(x.clients[key]);
-            });
+            clients.concat(x.ClientsArray);
         });
 
         return clients;
+    }
+
+    doOnVoliBotConnected(handler: (core: VoliBot) => void) {
+        const originalCallback = this.newVoliBotCore;
+        this.newVoliBotCore = ((bot: VoliBot) => {
+            originalCallback(bot);
+            handler(bot);
+        }).bind(this);
     }
 
     addCallbackHandler(id: string, handler: (data: any, serverId: string) => void) {
@@ -55,23 +57,22 @@ export class VoliBotManagerClass {
             return null;
         }
         return this.voliBotInstances.sort(
-            (a, b) => (a.ClientCount > b.ClientCount) ? 1 : ((b.ClientCount > a.ClientCount) ? -1 : 0))[0];
+            (a, b) => (a.ClientsCount > b.ClientsCount) ? 1 : ((b.ClientsCount > a.ClientsCount) ? -1 : 0))[0];
     }
 
     async addVoliBotInstance(url: string, port: number) {
         return new Promise<boolean>((resolve) => {
             try {
                 const voliBot = new VoliBot(url, port, (x) => {
-                    resolve(true);
                     this.onVoliBotOpen(x);
+                    resolve(true);
                 }, (x, y) => {
-                    resolve(false);
                     this.onVoliBotClose(x, y);
+                    resolve(false);
                 });
 
                 Object.keys(this.defaultWsCallbacks)
                       .forEach((key: string) => voliBot.addCallbackHandler(key, this.defaultWsCallbacks[key]));
-                this.voliBotInstances.push(voliBot);
             } catch (e) {
                 resolve(false);
             }
@@ -80,6 +81,7 @@ export class VoliBotManagerClass {
 
     private onVoliBotOpen(volibot: VoliBot) {
         this.voliBotInstances.push(volibot);
+        this.newVoliBotCore(volibot);
     }
 
     private onVoliBotClose(bot: VoliBot, _args: any) {

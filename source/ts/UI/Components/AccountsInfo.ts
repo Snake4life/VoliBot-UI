@@ -10,7 +10,7 @@ declare var require: any;
 import "datatables.net";
 import "datatables.net-select";
 import { Log } from "../../Managers";
-import { VoliClient } from "../../VoliClient";
+import { LeagueAccount } from "../../Models/LeagueAccount";
 // tslint:disable-next-line:no-var-requires
 require("datatables.net")(window, $);
 // tslint:disable-next-line:no-var-requires
@@ -82,9 +82,8 @@ export class ComponentAccountsInfo extends ComponentBase {
         let output: string = "";
 
         for (const i of selectedAccounts.length) {
-            const account = selectedAccounts[i] as VoliClient;
-            Log.debug(`${account.summoner.accountId}:${account.summoner.displayName}`);
-            output += `${account.summoner.accountId}:${account.summoner.displayName}\r\n`;
+            const account = selectedAccounts[i] as LeagueAccount;
+            output += `${account.username}:${account.password}\r\n`;
         }
 
         const element = document.createElement("a");

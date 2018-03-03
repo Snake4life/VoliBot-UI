@@ -2,6 +2,7 @@ import * as $ from "jquery";
 import { Accounts, Log, Notifications } from "../../Managers";
 import { LeagueAccount } from "../../Models/LeagueAccount";
 import { LeagueAccountSettings } from "../../Models/LeagueAccountSettings";
+import { LeagueAccountStatus } from "../../Models/LeagueAccountStatus";
 import { LeagueRegion } from "../../Models/LeagueRegion";
 import { ComponentBase } from "./";
 
@@ -10,7 +11,7 @@ export class ComponentAddAccount extends ComponentBase {
         $("#AddAccount .AddAccount_Add").click(this.doAddAccount);
     }
 
-    private doAddAccount() {
+    private async doAddAccount() {
         const username: string    = $("#AddAccount .AddAccount_Username").val() as string;
         const password: string    = $("#AddAccount .AddAccount_Password").val() as string;
         const server: string      = $("#AddAccount select.AccountSettings_Server").val() as string;
@@ -43,23 +44,30 @@ export class ComponentAddAccount extends ComponentBase {
             //- } else {
 
             const account: LeagueAccount = new LeagueAccount(
+                "",
+                -1,
                 username,
                 password,
                 parsedRegion,
-                new LeagueAccountSettings(queue, autoplay),
+                new LeagueAccountSettings(queue, autoplay, -1, -1), //TODO: TargetLevel & TargetBE
+                LeagueAccountStatus.None,
+                undefined,
+                undefined,
             );
 
-            Accounts.addAccount(account,
-                (acc) => {
-                    Notifications.addNotification(
-                        null,
-                        "Successfully added account!",
-                        `${acc.region} | ${acc.username}`,
-                        undefined,
-                        undefined,
-                        "fas fa-check-circle",
-                    );
-                }, () => failedToAddAccount());
+            const result = await Accounts.addAccount(account);
+            if (result != null) {
+                Notifications.addNotification(
+                    null,
+                    "Successfully added account!",
+                    `Core: ${account.serverId}\nRegion: ${result.region}\nUsername: ${result.username}`,
+                    undefined,
+                    undefined,
+                    "fas fa-check-circle",
+                );
+            } else {
+                failedToAddAccount();
+            }
 
             //- }
         } else {
@@ -72,7 +80,7 @@ export class ComponentAddAccount extends ComponentBase {
             Notifications.addNotification(
                 null,
                 "Failed to add account!",
-                `${parsedRegion || "Unknown Region"} | ${username}`,
+                `Region: ${parsedRegion || "Unknown Region"}\nUsername: ${username}`,
                 undefined,
                 undefined,
                 "fas fa-exclamation-triangle",

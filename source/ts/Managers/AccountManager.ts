@@ -3,16 +3,16 @@ import { Log, VoliBotManager } from "./";
 import { Manager } from "./Manager";
 
 export class AccountsManager extends Manager {
-    addAccount(
-        account: LeagueAccount,
-        onSuccess?: (account: LeagueAccount) => void,
-        onFail?: (account: LeagueAccount) => void): void {
+    async addAccount(account: LeagueAccount): Promise<LeagueAccount | null> {
         const instance = VoliBotManager.instanceWithLeastAccounts;
         if (instance) {
-            instance.addAccount(account, onSuccess, onFail);
+            account.serverId = instance.serverId;
+            return instance.createAccount(account);
         } else {
             Log.error("Could not add account: No suitable VoliBots instances found.");
         }
+
+        return Promise.resolve(null);
     }
 }
 

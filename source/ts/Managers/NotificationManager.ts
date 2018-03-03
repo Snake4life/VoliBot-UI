@@ -109,8 +109,11 @@ export class NotificationsManager extends Manager {
 
         notifications.forEach((notification) => {
             if (notification instanceof HTMLDivElement) {
-                // tslint:disable-next-line:max-line-length
-                iziToast.hide(notification, {message: "", transitionOut: "fadeOutRight", onClosed}, "closeNotification");
+                iziToast.hide(notification, {
+                    message: "",
+                    onClosed,
+                    transitionOut: "fadeOutRight",
+                }, "closeNotification");
             } else {
                 Log.warn(`Tried to close non-existant notification with notificationId: ${notificationId}`);
             }
