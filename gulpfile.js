@@ -70,8 +70,8 @@ gulp.task('ts:build', function () {
 		basedir: "./source/ts",
 		entries: "Main.ts",
 		debug: true,
-    	cache: {},
-        packageCache: {}
+		cache: {},
+		packageCache: {},
 	})
 	.plugin(tsify)
 	.transform(babelify, { "extensions": [".js", ".ts"] })

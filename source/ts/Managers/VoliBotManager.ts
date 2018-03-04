@@ -10,10 +10,10 @@ export class VoliBotManagerClass {
     initialize() { /* */ }
 
     getAllClients() {
-        const clients: LeagueAccount[] = [];
+        let clients: LeagueAccount[] = [];
 
         this.voliBotInstances.forEach((x) => {
-            clients.concat(x.ClientsArray);
+            clients = clients.concat(x.ClientsArray);
         });
 
         return clients;
@@ -77,6 +77,11 @@ export class VoliBotManagerClass {
                 resolve(false);
             }
         });
+    }
+
+    getByServerId(serverId: string): VoliBot | undefined {
+        const result = this.voliBotInstances.filter((bot) => bot.serverId === serverId);
+        return result.length > 0 ? result[0] : undefined;
     }
 
     private onVoliBotOpen(volibot: VoliBot) {

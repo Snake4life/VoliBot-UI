@@ -19,6 +19,9 @@ export class NewsManager extends Manager {
                 "updateWatcherOnError",
                 "Failed to check for updates.",
                 `Retrying in ${updateIntervalMs / 1000} seconds.`,
+                true,
+                undefined,
+                "fas fa-exclamation-triangle",
             );
         };
         this.newsWatcher.onError = (textStatus, errorThrown) => {
@@ -27,7 +30,7 @@ export class NewsManager extends Manager {
                 "newsWatcherOnError",
                 "Failed to retrieve news.",
                 `Retrying in ${updateIntervalMs / 1000} seconds.`,
-                undefined,
+                true,
                 undefined,
                 "fas fa-exclamation-triangle",
             );
@@ -48,7 +51,7 @@ export class NewsManager extends Manager {
             "uiVersionUpdate",
             "There's a UI update available!",
             "Click here to update!",
-            undefined,
+            false,
             () => {
                 UI.displayGoodbye = false;
                 UI.setCurrentScreen("None");
@@ -56,6 +59,7 @@ export class NewsManager extends Manager {
                     window.location.reload(true);
                 });
             },
+            "blue",
         );
     }
 }

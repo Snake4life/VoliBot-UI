@@ -39,6 +39,7 @@ export class VoliBot {
                 if (x == null) {
                     return;
                 }
+                x.serverId = this.serverId;
                 this.clients[x.accountId] = x;
             }, this);
 
@@ -88,10 +89,7 @@ export class VoliBot {
     }
 
     get ClientsArray(): LeagueAccount[] {
-        return Object.keys(this.clients).map((x) => {
-            this.clients[x].serverId = this.serverId;
-            return this.clients[x];
-        });
+        return Object.keys(this.clients).map((x) => this.clients[x]);
     }
 
     //#region Base functions; things used internally for other functions to work
@@ -105,9 +103,15 @@ export class VoliBot {
     async sendAsync(request: string, data?: any): Promise<any> {
         return new Promise<any>((resolve) => {
             const id: string = this.randomId();
-            this.wsCallbacks[id] = function(received: any): void {
+            this.wsCallbacks[id] = function(received: any, _serverId: string, result: any): void {
                 delete this.val;
-                resolve(received);
+                if (result[0] === MessageType.RESPONSE_SUCCESS) {
+                    resolve(received);
+                } else {
+                    Log.error(`Received RESPONSE_ERROR for call: ${request}\nData: ${JSON.stringify(data)}`,
+                              new Error(received));
+                    resolve(undefined);
+                }
             };
             this.socket.send(JSON.stringify([10, id, request, data]));
         });
@@ -164,47 +168,25 @@ export class VoliBot {
         // FEATURE: Default Settings
     }
 
-    private onCreatedAccount(_data: any) {
-        // FEATURE: Account Management
+    private onCreatedAccount(data: any) {
+        const acc = data as LeagueAccount;
+        acc.serverId = this.serverId;
+        this.clients[acc.accountId] = acc;
     }
 
-    private onDeletedAccount(_data: any) {
-        // FEATURE: Account Management
+    private onDeletedAccount(id: any) {
+        delete this.clients[id];
     }
 
-    private onUpdatedAccount(_data: any) {
-        // FEATURE: Account Management
+    private onUpdatedAccount(data: any) {
+        const acc = JSON.parse(data) as LeagueAccount;
+        acc.serverId = this.serverId;
+        Object.assign(this.clients[acc.accountId], acc);
     }
 
     //-private onAccountsList(_data: any) {
     //-     // FEATURE: Account Management
     //-}
-    /*
-    private onLoggingOut(_data: any): any {
-        // TODO: This.
-    }
-
-    private onUpdateStatus(data: any): void {
-        if (this.clients[data[2].id] === null) {
-            Log.warn("Recieved status for client we were not aware existed!");
-
-            Log.debug("Refreshing client list");
-            this.send("RequestInstanceList", "");
-        } else {
-            this.clients[data[2].id] = data[2];
-        }
-
-        // TODO: Update UI
-    }
-
-    private onUpdatePhase(_data: any): void {
-        Log.debug(this);
-        this.send("RequestInstanceList", "");
-
-        // Ignore this for now
-    }
-    //#endregion
-    */
 }
 
 export enum MessageType {

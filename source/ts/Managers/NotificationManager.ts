@@ -5,16 +5,21 @@
 //TODO: Fix iziToast typings?
 
 import * as $ from "jquery";
+import { Settings } from "./";
 import { Log } from "./LogManager";
 import { Manager } from "./Manager";
 
 import swal, { SweetAlertOptions, SweetAlertResult } from "sweetalert2";
 export { SweetAlertOptions as FullscreenNotification } from "sweetalert2";
 
-import * as iziToast from "izitoast";
+import iziToast = require("izitoast");
 
 export class NotificationsManager extends Manager {
     private _currentFullscreenId: number | undefined = undefined;
+
+    initialize() {
+        Settings.registerSetting("global_DefaultNotificationTimeout", 3000);
+    }
 
     private get currentFullscreenId() {
         return this._currentFullscreenId;
@@ -52,7 +57,7 @@ export class NotificationsManager extends Manager {
             };
 
             const result = swal(options);
-            const id = Math.floor(Math.random() * Math.floor(1000));
+            const id = Math.floor(Math.random() * 1000);
             this.currentFullscreenId = id;
             return { id, result };
         } else {
@@ -64,7 +69,7 @@ export class NotificationsManager extends Manager {
         notificationId: string | null,
         title: string,
         message: string,
-        timeout?: number,
+        timeout: number | boolean,
         onClick?: () => void,
         iconClasses?: string) {
         let toastId: string | undefined = `toast_${notificationId || "none"}`;
@@ -79,7 +84,7 @@ export class NotificationsManager extends Manager {
             if (oldNotification) {
                 // tslint:disable-next-line:max-line-length
                 Log.info(`Notification with notificationId '${notificationId}' already exists, closing it before opening a new notification.`);
-                this.closeNotification(notificationId, () => displayNotification.call(this));
+                this.closeNotification(notificationId, displayNotification.bind(this));
             } else {
                 displayNotification.call(this);
             }
@@ -89,13 +94,18 @@ export class NotificationsManager extends Manager {
         }
 
         function displayNotification() {
+            message = message.replace(/\n/g, "<br>");
+            if (typeof timeout === "boolean") {
+                timeout = timeout ? Settings.getNumber("global_DefaultNotificationTimeout") : false;
+            }
+
             iziToast.show({
                 icon: iconClasses,
                 id: toastId,
                 layout: 2,
                 message: `<strong>${title}</strong><br>${message}`,
                 theme: "dark",
-                timeout: timeout || false,
+                timeout,
             });
 
             if (onClick) {

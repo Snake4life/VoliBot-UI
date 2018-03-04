@@ -8,6 +8,7 @@ import * as $ from "jquery";
 import { ComponentBase } from "../";
 import { VoliBotManager } from "../../../Managers";
 import { LeagueAccount } from "../../../Models/LeagueAccount";
+import { LeagueAccountStatus } from "../../../Models/LeagueAccountStatus";
 import { LeagueAccountLevel } from "./LeagueAccountLevel";
 
 //#region Things you should probably avoid touching if you don't have a better solution.
@@ -26,6 +27,15 @@ require("datatables.net-select")(window, $);
 
 export class ComponentAccountsList extends ComponentBase {
     private accountsTable: any;
+    private statusText: {[index: number]: string} = {
+        [LeagueAccountStatus.None]:             "Inactive",
+        [LeagueAccountStatus.LoggedIn]:         "Logged in",
+        [LeagueAccountStatus.ChampionSelect]:   "In champion select",
+        [LeagueAccountStatus.ConnectingToGame]: "Loading game",
+        [LeagueAccountStatus.InGame]:           "In game",
+        [LeagueAccountStatus.EndOfGame]:        "At end of game",
+        [LeagueAccountStatus.Reconnecting]:     "Reconnecting to game",
+    };
 
     hookUi(): void {
         VoliBotManager.addCallbackHandler("CreatedAccount", this.onCreatedAccount.bind(this));
@@ -35,16 +45,19 @@ export class ComponentAccountsList extends ComponentBase {
         this.initializeDataTable();
 
         VoliBotManager.doOnVoliBotConnected((instance) => {
-            this.accountsTable.rows
-                              .add(instance.ClientsArray)
-                              .draw();
+            this.accountsTable
+                .rows
+                .add(instance.ClientsArray)
+                .draw();
         });
 
         //TODO: Handle all events
     }
 
-    onCreatedAccount(account: LeagueAccount) {
+    onCreatedAccount(account: LeagueAccount, serverId: string) {
+        account.serverId = serverId;
         this.accountsTable
+            .row
             .add(account)
             .draw();
     }
@@ -59,6 +72,7 @@ export class ComponentAccountsList extends ComponentBase {
     }
 
     onUpdatedAccount(account: LeagueAccount, serverId: string) {
+        account.serverId = serverId;
         Array.from<LeagueAccount>(this.accountsTable
             .rows((_index: number, data: LeagueAccount) =>
                     data.serverId === serverId &&
@@ -89,11 +103,11 @@ export class ComponentAccountsList extends ComponentBase {
             columns: [
                 { data: (x: LeagueAccount) => x.serverId != null ? x.serverId : "Unknown" },
                 { data: (x: LeagueAccount) => new LeagueAccountLevel(x) },
-                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.displayName : "Loading..." },
-                { data: (x: LeagueAccount) => x.status   != null ? x.status               : "Loading..." },
-                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.summonerId  : "Loading..." },
-                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.ip            : "Loading..." },
-                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.rp            : "Loading..." },
+                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.displayName    : `[${x.username}]` },
+                { data: (x: LeagueAccount) => x.status   != null ? this.statusText[x.status] : "Loading..." },
+                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.summonerId     : "Unknown" },
+                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.ip               : "Unknown" },
+                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.rp               : "Unknown" },
             ],
             language: {
                 info: "Registered accounts: _TOTAL_",

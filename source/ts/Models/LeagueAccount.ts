@@ -2,6 +2,7 @@ import { LolStoreWallet } from "./League/LolStoreWallet";
 import { LolSummonerSummoner } from "./League/LolSummonerSummoner";
 import { LeagueAccountSettings } from "./LeagueAccountSettings";
 import { LeagueAccountStatus } from "./LeagueAccountStatus";
+import { LeagueRegion } from "./LeagueRegion";
 
 export class LeagueAccount {
     serverId: string | undefined;
@@ -9,7 +10,7 @@ export class LeagueAccount {
     username: string;
     password: string;
 
-    region: string;
+    region: LeagueRegion;
     settings: LeagueAccountSettings;
 
     status: LeagueAccountStatus;
@@ -21,7 +22,7 @@ export class LeagueAccount {
         accountId: number,
         username: string,
         password: string,
-        region: string,
+        region: LeagueRegion,
         settings: LeagueAccountSettings,
         status: LeagueAccountStatus,
         summoner: LolSummonerSummoner | undefined,

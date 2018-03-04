@@ -148,6 +148,7 @@ export class ScreenLogin extends ScreenBase {
                         "Failed to connect to instance:",
                         hostnames[i],
                         "fa fa-exclamation-circle",
+                        false,
                     );
                 }
             }

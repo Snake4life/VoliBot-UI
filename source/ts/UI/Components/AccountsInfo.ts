@@ -9,7 +9,7 @@ import { ComponentBase } from "./";
 declare var require: any;
 import "datatables.net";
 import "datatables.net-select";
-import { Log } from "../../Managers";
+import { Log, Notifications, VoliBotManager } from "../../Managers";
 import { LeagueAccount } from "../../Models/LeagueAccount";
 // tslint:disable-next-line:no-var-requires
 require("datatables.net")(window, $);
@@ -24,6 +24,7 @@ export class ComponentAccountsInfo extends ComponentBase {
     private dataTable: any = undefined;
 
     private extractButton: JQuery<HTMLElement> | undefined = undefined;
+    private removeButton: JQuery<HTMLElement> | undefined = undefined;
 
     private set selectedAccountsCount(val: number) {
         $(".accounts-preview__selected_accounts")
@@ -46,30 +47,41 @@ export class ComponentAccountsInfo extends ComponentBase {
         this.nonSelected = $(".accounts-preview__no_selected");
         this.dataTable = $(".datatable").DataTable();
         this.extractButton = $(".accounts-preview__extract");
+        this.removeButton = $(".accounts-preview__remove");
 
         this.showAccountInfo = false;
 
         this.dataTable
-            .on("select.dt", this.updateAccountsInfo.bind(this))
-            .on("deselect.dt", this.updateAccountsInfo.bind(this));
+            .on("select.dt", this.onTableSelectionChanged.bind(this))
+            .on("deselect.dt", this.onTableSelectionChanged.bind(this));
 
-        $(".accounts-preview__extract")
-            .click(this.extractAccounts.bind(this));
+        this.extractButton.click(this.extractAccounts.bind(this));
+        this.removeButton.click(this.removeAccounts.bind(this));
+
+        VoliBotManager.addCallbackHandler("CreatedAccount", this.updateAccountsInfo.bind(this));
+        VoliBotManager.addCallbackHandler("DeletedAccount", this.updateAccountsInfo.bind(this));
+        VoliBotManager.addCallbackHandler("UpdatedAccount", this.updateAccountsInfo.bind(this));
 
         this.initialized = true;
     }
 
-    private updateAccountsInfo(_e: any, dt: any, type: any, _indexes: any) {
+    private onTableSelectionChanged(_e: any, _dt: any, type: any) {
         if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
 
         if (type === "row") {
-            const data = dt.rows({ selected: true }).data();
-            if (data.length === 0) {
-                this.showAccountInfo = false;
-            } else {
-                this.showAccountInfo = true;
-                this.selectedAccountsCount = data.length;
-            }
+            this.updateAccountsInfo();
+        }
+    }
+
+    private updateAccountsInfo() {
+        if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
+
+        const data = this.dataTable.rows({ selected: true }).data();
+        if (data.length === 0) {
+            this.showAccountInfo = false;
+        } else {
+            this.showAccountInfo = true;
+            this.selectedAccountsCount = data.length;
         }
     }
 
@@ -93,5 +105,47 @@ export class ComponentAccountsInfo extends ComponentBase {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
+    }
+
+    private async removeAccounts() {
+        if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
+        if (!this.extractButton) { throw new Error(`Failed to retrive ${"extractButton"} from DOM`); }
+
+        const selectedAccounts = this.dataTable.rows({ selected: true }).data();
+        const swal = await Notifications.fullscreenNotification({
+            focusCancel: true,
+            showCancelButton: true,
+            showConfirmButton: true,
+            text: "After removing accounts, you can NOT restore them.<br>Do you want to continue?",
+            title: `You are about to remove ${selectedAccounts.length} accounts.`,
+            type: "warning",
+        }).result;
+
+        if (!swal.dismiss && swal.value === true) {
+            for (const i of selectedAccounts.length) {
+                const account = selectedAccounts[i] as LeagueAccount;
+                let result = false;
+                if (account.serverId === undefined) {
+                    Log.warn("Can not remove account as serverId is undefined!");
+                } else {
+                    const bot = VoliBotManager.getByServerId(account.serverId);
+                    if (bot === undefined) {
+                        // tslint:disable-next-line:max-line-length
+                        Log.warn(`Could not find server for account: [${account.serverId}] ${account.region}|${account.username}`);
+                    } else {
+                        result = await bot.deleteAccount(account.accountId);
+                    }
+                }
+
+                Notifications.addNotification(
+                    null,
+                    result ? "Successfully removed account." : "Failed to remove account!",
+                    `Username: ${account.username}\nRegion: ${account.region}\nCore: ${account.serverId}`,
+                    result,
+                    undefined,
+                    result ? "fas fa-check-circle" : "fas fa-exclamation-triangle",
+                );
+            }
+        }
     }
 }
