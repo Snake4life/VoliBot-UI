@@ -2,11 +2,11 @@ import * as $ from "jquery";
 import swal from "sweetalert2";
 
 window.onerror = (_, __, ___, ____, error) => {
+    //TODO: IMPORTANT! Remove user passwords from logs before sending them!
+    //TODO: Handle this serverside somewhere
     const crashId = uuidv4();
 
     error = error || new Error("No error object received.");
-
-    //TODO: Handle this serverside somewhere
     Log.error("Uncaught Exception: ", error);
 
     Notifications.fullscreenNotification({
@@ -97,16 +97,6 @@ UI.registerScreen("Login", new ScreenLogin());
 UI.registerScreen("Main", new ScreenMain());
 UI.registerScreen("None", new ScreenNone());
 
-Log.initialize();
-Settings.initialize();
-Notifications.initialize();
-News.initialize();
-Accounts.initialize();
-VoliBotManager.initialize();
-UI.initialize();
-
-import { Debugging } from "./Debugging";
-
 const context = {
     Accounts,
     Log,
@@ -117,5 +107,13 @@ const context = {
     VoliBotManager,
 };
 
+import { Debugging } from "./Debugging";
 (window as any).voli = context;
 Debugging.initialize(context);
+Log.initialize();
+Notifications.initialize();
+UI.initialize();
+News.initialize();
+Accounts.initialize();
+VoliBotManager.initialize();
+Settings.initialize();

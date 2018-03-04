@@ -1,7 +1,7 @@
-import {VoliClient} from "../../../VoliClient";
+import {LeagueAccount} from "../../../Models/LeagueAccount";
 
-export class VoliClientLevel {
-    private client: VoliClient;
+export class LeagueAccountLevel {
+    private client: LeagueAccount;
 
     get level() { return this.client.summoner &&
                          this.client.summoner.summonerLevel
@@ -10,7 +10,7 @@ export class VoliClientLevel {
                            this.client.summoner.percentCompleteForNextLevel
                            || 0; }
 
-    constructor(x: VoliClient) {
+    constructor(x: LeagueAccount) {
         this.client = x;
     }
 }

@@ -1,4 +1,4 @@
-import * as Mousetrap from "mousetrap";
+import Mousetrap = require("mousetrap");
 import { Log, Notifications } from "../Managers";
 
 export class DebuggingClass {
@@ -26,7 +26,13 @@ export class DebuggingClass {
             let output: any | undefined;
 
             try {
-                output = eval.call(this.context, `(${input.value})`);
+                // I have to disable rules here to make it work, at least as far as I know.
+                // If there's a better way, feel free to change to using that instead.
+                // tslint:disable-next-line:only-arrow-functions
+                output = (function(str: string) {
+                    // tslint:disable-next-line:no-eval
+                    return eval(str);
+                }).call(this.context, `(${input.value})`);
             } catch (e) {
                 output = (e as Error).message;
             }

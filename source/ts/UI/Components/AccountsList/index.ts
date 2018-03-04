@@ -7,9 +7,9 @@ import * as $ from "jquery";
 
 import { ComponentBase } from "../";
 import { VoliBotManager } from "../../../Managers";
-import { VoliBot } from "../../../VoliBot";
-import { VoliClient } from "../../../VoliClient";
-import { VoliClientLevel } from "./VoliClientLevel";
+import { LeagueAccount } from "../../../Models/LeagueAccount";
+import { LeagueAccountStatus } from "../../../Models/LeagueAccountStatus";
+import { LeagueAccountLevel } from "./LeagueAccountLevel";
 
 //#region Things you should probably avoid touching if you don't have a better solution.
 // I have no clue WHY this works, but it works, so I'm going to leave it here.
@@ -19,58 +19,70 @@ import { VoliClientLevel } from "./VoliClientLevel";
 declare var require: any;
 import "datatables.net";
 import "datatables.net-select";
-// tslint:disable-next-line:no-var-requires
+// tslint:disable:no-var-requires
 require("datatables.net")(window, $);
-// tslint:disable-next-line:no-var-requires
 require("datatables.net-select")(window, $);
+// tslint:enable:no-var-requires
 //#endregion
 
 export class ComponentAccountsList extends ComponentBase {
     private accountsTable: any;
+    private statusText: {[index: number]: string} = {
+        [LeagueAccountStatus.None]:             "Inactive",
+        [LeagueAccountStatus.LoggedIn]:         "Logged in",
+        [LeagueAccountStatus.ChampionSelect]:   "In champion select",
+        [LeagueAccountStatus.ConnectingToGame]: "Loading game",
+        [LeagueAccountStatus.InGame]:           "In game",
+        [LeagueAccountStatus.EndOfGame]:        "At end of game",
+        [LeagueAccountStatus.Reconnecting]:     "Reconnecting to game",
+    };
 
     hookUi(): void {
-        VoliBotManager.addCallbackHandler("ListInstance", (x, y) => this.updateAccountsList(x[2].List, y));
+        VoliBotManager.addCallbackHandler("CreatedAccount", this.onCreatedAccount.bind(this));
+        VoliBotManager.addCallbackHandler("DeletedAccount", this.onDeletedAccount.bind(this));
+        VoliBotManager.addCallbackHandler("UpdatedAccount", this.onUpdatedAccount.bind(this));
+
         this.initializeDataTable();
+
+        VoliBotManager.doOnVoliBotConnected((instance) => {
+            this.accountsTable
+                .rows
+                .add(instance.ClientsArray)
+                .draw();
+        });
+
+        //TODO: Handle all events
     }
 
-    updateAccountsList(clientsObject: {[id: string]: VoliClient}, serverId: string) {
-        const incomingClients = clientsObject == null ? [] :
-            Object.keys(clientsObject)
-                  .map((key) => clientsObject[key])
-                  .filter((x) => x !== null);
-
-        if (incomingClients == null) {
-            this.accountsTable.clear();
-            return;
-        }
-
-        const currentClients: VoliClient[] = Array.from(this.accountsTable.rows(
-            (_index: number, data: VoliBot) => (data.serverId === serverId),
-        ).data());
-
-        const updatedClients: VoliClient[] = [];
-        const newClients: VoliClient[] = [];
-
-        for (const i of incomingClients) {
-            if (currentClients.filter((x) => x.id === i.id).length > 0) {
-                updatedClients.push(i);
-            } else {
-                i.serverId = serverId;
-                newClients.push(i);
-            }
-        }
-
-        const removedClients: number[] = currentClients.filter((x) => incomingClients.indexOf(x) !== -1)
-                                                       .map((x) => x.id);
-
+    onCreatedAccount(account: LeagueAccount, serverId: string) {
+        account.serverId = serverId;
         this.accountsTable
-            .rows((_index: number, data: VoliClient) =>
-                data.serverId === serverId &&
-                removedClients.indexOf(data.id) !== -1)
-            .remove()
-            .rows
-            .add(newClients)
+            .row
+            .add(account)
             .draw();
+    }
+
+    onDeletedAccount(accountId: number, serverId: string) {
+        this.accountsTable
+            .rows((_index: number, data: LeagueAccount) =>
+                    data.serverId === serverId &&
+                    data.accountId === accountId)
+            .remove()
+            .draw();
+    }
+
+    onUpdatedAccount(account: LeagueAccount, serverId: string) {
+        account.serverId = serverId;
+        Array.from<LeagueAccount>(this.accountsTable
+            .rows((_index: number, data: LeagueAccount) =>
+                    data.serverId === serverId &&
+                    data.accountId === account.accountId)
+            .data())
+            .forEach((_element: LeagueAccount) => {
+                Object.assign(_element, account);
+            });
+
+        this.accountsTable.draw();
     }
 
     private initializeDataTable() {
@@ -78,7 +90,7 @@ export class ComponentAccountsList extends ComponentBase {
             columnDefs: [
                 {
                     targets: 1,
-                    render(data: VoliClientLevel, type) {
+                    render(data: LeagueAccountLevel, type) {
                         if (type === "display" || type === "filter") {
                             // Make sure the percentage is never "100%". Mostly because it looks bad :)
                             return `${data.level} (+${Math.min(data.percent, 99)}%)`;
@@ -89,13 +101,13 @@ export class ComponentAccountsList extends ComponentBase {
                 },
             ],
             columns: [
-                { data: (x: VoliClient) => x.serverId != null ? x.serverId : "Unknown" },
-                { data: (x: VoliClient) => new VoliClientLevel(x) },
-                { data: (x: VoliClient) => x.summoner != null ? x.summoner.displayName : "Loading..." },
-                { data: (x: VoliClient) => x.status   != null ? x.status               : "Loading..." },
-                { data: (x: VoliClient) => x.summoner != null ? x.summoner.summonerId  : "Loading..." },
-                { data: (x: VoliClient) => x.wallet   != null ? x.wallet.ip            : "Loading..." },
-                { data: (x: VoliClient) => x.wallet   != null ? x.wallet.rp            : "Loading..." },
+                { data: (x: LeagueAccount) => x.serverId != null ? x.serverId : "Unknown" },
+                { data: (x: LeagueAccount) => new LeagueAccountLevel(x) },
+                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.displayName    : `[${x.username}]` },
+                { data: (x: LeagueAccount) => x.status   != null ? this.statusText[x.status] : "Loading..." },
+                { data: (x: LeagueAccount) => x.summoner != null ? x.summoner.summonerId     : "Unknown" },
+                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.ip               : "Unknown" },
+                { data: (x: LeagueAccount) => x.wallet   != null ? x.wallet.rp               : "Unknown" },
             ],
             language: {
                 info: "Registered accounts: _TOTAL_",

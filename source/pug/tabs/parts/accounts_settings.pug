@@ -1,0 +1,34 @@
+.panel.panel-info.accounts-preview__no_selected#AddAccount
+    .panel-heading
+        h3.panel-title Add Account
+    .panel-body
+        ul.nav.nav-tabs
+            li.active#account_settings__credentials_li
+                a(data-toggle="tab", href="#account_settings__credentials") Add
+            li#account_settings__import_li
+                a(data-toggle="tab", href="#account_settings__import") Import
+        .tab-content(style="padding:11px 0 0 0")
+            .tab-pane.fade.in.active#account_settings__credentials
+                .form-group
+                    .input-group
+                        .input-group-addon
+                            i.fa.fa-user
+                        input.form-control.AddAccount_Username(type="text", placeholder="Username", data-lpignore="true")
+                .form-group
+                    .input-group
+                        .input-group-addon
+                            i.fa.fa-unlock-alt
+                        input.form-control.AddAccount_Password(type="password", placeholder="Password", data-lpignore="true")     
+            .tab-pane.fade#account_settings__import
+                .form-group
+                    button.btn.btn-primary.btn-block.AddAccount_Import
+        include ./parts/account_settings.pug
+        .form-group
+            button.btn.btn-primary.btn-block.AddAccount_Add Add Account
+.panel.panel-info.accounts-preview__selected#EditAccount
+    .panel-heading
+        h3.panel-title Account Settings
+    .panel-body
+        include ./parts/account_settings.pug
+        .form-group
+            button.btn.btn-primary.btn-block.accounts-preview__extract Save Changes

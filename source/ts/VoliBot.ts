@@ -7,13 +7,13 @@ import { Log } from "./Managers";
 // IT'LL BE WORTH IT TO USE A SANE LANGUAGE
 
 import { LeagueAccount } from "./Models/LeagueAccount";
-import { VoliClient } from "./VoliClient";
+import { LeagueAccountSettings } from "./Models/LeagueAccountSettings";
 
 export class VoliBot {
     socket: WebSocket;
-    clients: { [id: string]: VoliClient } = { };
     serverId: string;
-    private wsCallbacks: { [id: string]: (data: any, serverId: string) => void } = { };
+    private clients: { [id: string]: LeagueAccount } = { };
+    private wsCallbacks: { [id: string]: (data: any, serverId: string, packet: any) => void } = { };
 
     constructor(
         hostname: string,
@@ -23,16 +23,29 @@ export class VoliBot {
         this.serverId = hostname;
         this.socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
 
-        this.socket.onopen = (...args: any[]) => {
-            this.addCallbackHandler("LoggingOut",   (data) => this.onLoggingOut(data));
-            this.addCallbackHandler("UpdateStatus", (data) => this.onUpdateStatus(data));
-            this.addCallbackHandler("ListInstance", (data) => this.onListInstance(data));
-            this.addCallbackHandler("UpdatePhase",  (data) => this.onUpdatePhase(data));
+        this.socket.onopen = async (...args: any[]) => {
+            this.addCallbackHandler("UpdatedDefaultSettings", this.onUpdatedDefaultSettings.bind(this));
+            this.addCallbackHandler("CreatedAccount",         this.onCreatedAccount.bind(this));
+            this.addCallbackHandler("DeletedAccount",         this.onDeletedAccount.bind(this));
+            this.addCallbackHandler("UpdatedAccount",         this.onUpdatedAccount.bind(this));
+            //-this.addCallbackHandler("AccountsList",           this.onAccountsList.bind(this));
+
+            const allClients: LeagueAccount[] = await this.getAccountList();
+            if (allClients == null) {
+                return;
+            }
+
+            allClients.forEach((x) => {
+                if (x == null) {
+                    return;
+                }
+                x.serverId = this.serverId;
+                this.clients[x.accountId] = x;
+            }, this);
 
             if (onOpen !== undefined) {
                 onOpen(this, ...args);
             }
-            this.send("RequestInstanceList", "");
         };
 
         this.socket.onerror = (error: Event) => {
@@ -50,53 +63,34 @@ export class VoliBot {
             Log.debug("Received data: " + JSON.stringify(data));
             if ((data[0] === MessageType.RESPONSE_ERROR || data[0] === MessageType.RESPONSE_SUCCESS) &&
                 this.wsCallbacks[data[1]] != null) {
-                this.wsCallbacks[data[1]].call(this, data, this.serverId);
+                this.wsCallbacks[data[1]].call(this, data[2], this.serverId, data);
             }
 
             if (data[0] === MessageType.EVENT && this.wsCallbacks[data[1]] != null) {
-                this.wsCallbacks[data[1]].call(this, data, this.serverId);
+                this.wsCallbacks[data[1]].call(this, data[2], this.serverId, data);
             }
         };
     }
 
-    addCallbackHandler(id: string, handler: (data: any, serverId: string) => void): void {
+    addCallbackHandler(id: string, handler: (data: any, serverId: string, packet: any) => void): void {
         if (this.wsCallbacks[id]) {
-            const originalCallback: (data: any, serverId: string) => void = this.wsCallbacks[id];
-            this.wsCallbacks[id] = (x, serverId) => {
-                originalCallback(x, serverId);
-                handler(x, serverId);
+            const originalCallback: (data: any, serverId: string, packet: any) => void = this.wsCallbacks[id];
+            this.wsCallbacks[id] = (x, serverId, packet) => {
+                originalCallback(x, serverId, packet);
+                handler(x, serverId, packet);
             };
         } else {
             this.wsCallbacks[id] = handler;
         }
     }
 
-    get ClientCount(): number {
+    get ClientsCount(): number {
         return Object.keys(this.clients).length;
     }
 
-    addAccount(
-        account: LeagueAccount,
-        onSuccess?: (account: LeagueAccount) => void,
-        onFail?: (account: LeagueAccount) => void): void {
-            this.requestInstanceStart(
-                account.username,
-                account.password,
-                account.region.toString(),
-                account.settings.queue,
-                account.settings.autoplay,
-                (result: any): void => {
-                    if (result[2] === "success") {
-                        if (onSuccess) {
-                            onSuccess(account);
-                        }
-                    } else {
-                        if (onFail) {
-                            onFail(account);
-                        }
-                    }
-                });
-            }
+    get ClientsArray(): LeagueAccount[] {
+        return Object.keys(this.clients).map((x) => this.clients[x]);
+    }
 
     //#region Base functions; things used internally for other functions to work
     shutdown(): void {
@@ -106,16 +100,21 @@ export class VoliBot {
         this.socket.close();
     }
 
-    send(request: string, data: any, callback?: (data: any[]) => void): void {
-        const id: string = this.randomId();
-        this.wsCallbacks[id] = function(received: any): void {
-            delete this.val;
-            if (callback !== undefined) {
-                callback(received);
-            }
-        };
-
-        this.socket.send(JSON.stringify([10, id, request, data]));
+    async sendAsync(request: string, data?: any): Promise<any> {
+        return new Promise<any>((resolve) => {
+            const id: string = this.randomId();
+            this.wsCallbacks[id] = function(received: any, _serverId: string, result: any): void {
+                delete this.val;
+                if (result[0] === MessageType.RESPONSE_SUCCESS) {
+                    resolve(received);
+                } else {
+                    Log.error(`Received RESPONSE_ERROR for call: ${request}\nData: ${JSON.stringify(data)}`,
+                              new Error(received));
+                    resolve(undefined);
+                }
+            };
+            this.socket.send(JSON.stringify([10, id, request, data]));
+        });
     }
     //#endregion
 
@@ -128,82 +127,66 @@ export class VoliBot {
     }
     //#endregion
 
+    //#region New spec
+    async getAccountList(): Promise<LeagueAccount[]> {
+        return this.sendAsync("GetAccountList");
+    }
+
+    async getDefaultSettings(): Promise<LeagueAccountSettings> {
+        return this.sendAsync("GetDefaultSettings");
+    }
+
+    async getAccountDetails(accountId: number): Promise<LeagueAccount> {
+        return this.sendAsync("GetAccountDetails", accountId);
+    }
+
+    async deleteAccount(accountId: number): Promise<boolean> {
+        return this.sendAsync("DeleteAccount", accountId);
+    }
+
+    async createAccount(account: LeagueAccount): Promise<LeagueAccount | null> {
+        return this.sendAsync("CreateAccount", account);
+    }
+
+    async updateAccountSettings(accountId: number, settings: LeagueAccountSettings): Promise<boolean> {
+        return this.sendAsync("UpdateAccountSettings", {accountId, settings});
+    }
+
+    async updateDefaultSettings(settings: LeagueAccountSettings): Promise<boolean> {
+        return this.sendAsync("UpdateDefaultSettings", settings);
+    }
+    //#endregion
+
     //#region Public functions
-    requestInstanceLogout(id: number, callback?: (data: any) => void): void {
-        this.send("RequestInstanceLogout", { id }, (result: any): void => {
-            if (callback !== undefined) {
-                callback(result);
-            }
-        });
-    }
-
-    requestInstanceStart(
-        username: string,
-        password: string,
-        region: string,
-        queue: number,
-        autoplay: boolean,
-        callback?: (data: any) => void): void {
-        this.send("RequestInstanceStart", {
-            autoplay,
-            password,
-            queue,
-            region,
-            username,
-        }, (result: any): void => {
-            if (callback !== undefined) {
-                callback(result);
-            }
-        });
-    }
-
-    getClientById(id: number): VoliClient | null {
+    getClientById(id: number): LeagueAccount | null {
         return this.clients[id] || null;
     }
     //#endregion
 
     //#region Websocket event handlers
-    private onLoggingOut(_data: any): any {
-        // TODO: This.
+    private onUpdatedDefaultSettings(_data: any) {
+        // FEATURE: Default Settings
     }
 
-    private onUpdateStatus(data: any): void {
-        if (this.clients[data[2].id] === null) {
-            Log.warn("Recieved status for client we were not aware existed!");
-
-            Log.debug("Refreshing client list");
-            this.send("RequestInstanceList", "");
-        } else {
-            this.clients[data[2].id] = data[2];
-        }
-
-        // TODO: Update UI
+    private onCreatedAccount(data: any) {
+        const acc = data as LeagueAccount;
+        acc.serverId = this.serverId;
+        this.clients[acc.accountId] = acc;
     }
 
-    private onListInstance(data: any): void {
-        Log.debug(data);
-        const allClients: VoliClient[] = data[2].List;
-        if (allClients == null) {
-            return;
-        }
-
-        allClients.forEach((x) => {
-            if (x == null) {
-                return;
-            }
-            this.clients[x.id] = x;
-        }, this);
-
-        // TODO: Refresh UI
+    private onDeletedAccount(id: any) {
+        delete this.clients[id];
     }
 
-    private onUpdatePhase(_data: any): void {
-        Log.debug(this);
-        this.send("RequestInstanceList", "");
-
-        // Ignore this for now
+    private onUpdatedAccount(data: any) {
+        const acc = JSON.parse(data) as LeagueAccount;
+        acc.serverId = this.serverId;
+        Object.assign(this.clients[acc.accountId], acc);
     }
-    //#endregion
+
+    //-private onAccountsList(_data: any) {
+    //-     // FEATURE: Account Management
+    //-}
 }
 
 export enum MessageType {

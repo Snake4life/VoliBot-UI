@@ -1,9 +1,18 @@
 export class LeagueAccountSettings {
     queue: number;
-    autoplay: boolean;
+    active: boolean;
+    targetLevel: number;
+    targetBE: number;
 
-    constructor(queue: number, autoplay: boolean) {
+    constructor(
+        queue: number,
+        active: boolean,
+        targetLevel: number,
+        targetBE: number,
+    ) {
         this.queue = queue;
-        this.autoplay = autoplay;
+        this.active = active;
+        this.targetBE = targetBE;
+        this.targetLevel = targetLevel;
     }
 }
