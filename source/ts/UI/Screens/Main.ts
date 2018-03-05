@@ -25,8 +25,8 @@ export class ScreenMain extends ScreenBase {
     }
 
     registerComponents(register: (component: ComponentBase) => void) {
+        register(new ComponentAccountsList()); // Needs to be first as it initializes the accountTable
         register(new ComponentAddAccount());
-        register(new ComponentAccountsList());
         register(new ComponentAccountsInfo());
     }
 

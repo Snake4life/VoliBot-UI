@@ -9,7 +9,7 @@ import { ComponentBase } from "./";
 declare var require: any;
 import "datatables.net";
 import "datatables.net-select";
-import { Log, Notifications, VoliBotManager } from "../../Managers";
+import { Accounts, Log, Notifications, VoliBotManager } from "../../Managers";
 import { LeagueAccount } from "../../Models/LeagueAccount";
 // tslint:disable-next-line:no-var-requires
 require("datatables.net")(window, $);
@@ -21,7 +21,6 @@ export class ComponentAccountsInfo extends ComponentBase {
     private initialized: boolean = false;
     private accountInfo: JQuery<HTMLElement> | undefined = undefined;
     private nonSelected: JQuery<HTMLElement> | undefined = undefined;
-    private dataTable: any = undefined;
 
     private extractButton: JQuery<HTMLElement> | undefined = undefined;
     private removeButton: JQuery<HTMLElement> | undefined = undefined;
@@ -45,13 +44,12 @@ export class ComponentAccountsInfo extends ComponentBase {
     hookUi(): void {
         this.accountInfo = $(".accounts-preview__selected");
         this.nonSelected = $(".accounts-preview__no_selected");
-        this.dataTable = $(".datatable").DataTable();
         this.extractButton = $(".accounts-preview__extract");
         this.removeButton = $(".accounts-preview__remove");
 
         this.showAccountInfo = false;
 
-        this.dataTable
+        Accounts.table
             .on("select.dt", this.onTableSelectionChanged.bind(this))
             .on("deselect.dt", this.onTableSelectionChanged.bind(this));
 
@@ -76,7 +74,7 @@ export class ComponentAccountsInfo extends ComponentBase {
     private updateAccountsInfo() {
         if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
 
-        const data = this.dataTable.rows({ selected: true }).data();
+        const data = Accounts.table.rows({ selected: true }).data();
         if (data.length === 0) {
             this.showAccountInfo = false;
         } else {
@@ -89,12 +87,11 @@ export class ComponentAccountsInfo extends ComponentBase {
         if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
         if (!this.extractButton) { throw new Error(`Failed to retrive ${"extractButton"} from DOM`); }
 
-        const selectedAccounts = this.dataTable.rows({ selected: true }).data();
+        const selectedAccounts = Array.from<LeagueAccount>(Accounts.table.rows({ selected: true }).data() as any);
 
         let output: string = "";
 
-        for (const i of selectedAccounts.length) {
-            const account = selectedAccounts[i] as LeagueAccount;
+        for (const account of selectedAccounts) {
             output += `${account.username}:${account.password}\r\n`;
         }
 
@@ -111,7 +108,7 @@ export class ComponentAccountsInfo extends ComponentBase {
         if (!this.initialized) { throw new Error("Can't call method before initializing!"); }
         if (!this.extractButton) { throw new Error(`Failed to retrive ${"extractButton"} from DOM`); }
 
-        const selectedAccounts = this.dataTable.rows({ selected: true }).data();
+        const selectedAccounts = Array.from<LeagueAccount>(Accounts.table.rows({ selected: true }).data() as any);
         const swal = await Notifications.fullscreenNotification({
             focusCancel: true,
             showCancelButton: true,
@@ -122,13 +119,12 @@ export class ComponentAccountsInfo extends ComponentBase {
         }).result;
 
         if (!swal.dismiss && swal.value === true) {
-            for (const i of selectedAccounts.length) {
-                const account = selectedAccounts[i] as LeagueAccount;
+            for (const account of selectedAccounts) {
                 let result = false;
                 if (account.serverId === undefined) {
                     Log.warn("Can not remove account as serverId is undefined!");
                 } else {
-                    const bot = VoliBotManager.getByServerId(account.serverId);
+                    const bot = VoliBotManager.getServerById(account.serverId);
                     if (bot === undefined) {
                         // tslint:disable-next-line:max-line-length
                         Log.warn(`Could not find server for account: [${account.serverId}] ${account.region}|${account.username}`);

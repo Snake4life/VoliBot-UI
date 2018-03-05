@@ -18,7 +18,7 @@ export class NotificationsManager extends Manager {
     private _currentFullscreenId: number | undefined = undefined;
 
     initialize() {
-        Settings.registerSetting("global_DefaultNotificationTimeout", 3000);
+        Settings.registerSetting("global_DefaultNotificationTimeout", 1500);
     }
 
     private get currentFullscreenId() {
@@ -72,7 +72,7 @@ export class NotificationsManager extends Manager {
         timeout: number | boolean,
         onClick?: () => void,
         iconClasses?: string) {
-        let toastId: string | undefined = `toast_${notificationId || "none"}`;
+        const toastId: string | undefined = `toast_${notificationId || Math.floor(Math.random() * 10000) }`;
 
         if (notificationId != null) {
             if (/[^a-z^A-Z]/.test(notificationId)) {
@@ -83,13 +83,12 @@ export class NotificationsManager extends Manager {
             const oldNotification = document.getElementById(toastId);
             if (oldNotification) {
                 // tslint:disable-next-line:max-line-length
-                Log.info(`Notification with notificationId '${notificationId}' already exists, closing it before opening a new notification.`);
+                Log.debug(`Notification with notificationId '${notificationId}' already exists, closing it before opening a new notification.`);
                 this.closeNotification(notificationId, displayNotification.bind(this));
             } else {
                 displayNotification.call(this);
             }
         } else {
-            toastId = undefined;
             displayNotification.call(this);
         }
 
@@ -109,7 +108,7 @@ export class NotificationsManager extends Manager {
             });
 
             if (onClick) {
-                $(`#toast_${notificationId} > .iziToast-body`).on("click", onClick);
+                $(`#${toastId} > .iziToast-body`).on("click", onClick).css("cursor", "pointer");
             }
         }
     }
@@ -118,6 +117,7 @@ export class NotificationsManager extends Manager {
         const notifications = document.querySelectorAll(`#toast_${notificationId}`);
 
         notifications.forEach((notification) => {
+            $(notification).off("click");
             if (notification instanceof HTMLDivElement) {
                 iziToast.hide(notification, {
                     message: "",

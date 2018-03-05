@@ -24,14 +24,14 @@ export class UiManager extends Manager {
         this.setCurrentScreen(inData);
     }
 
-    setCurrentScreen(inData: string | ScreenBase): AnimeTimelineInstance {
+    setCurrentScreen(inData: string | ScreenBase | undefined): AnimeTimelineInstance {
         Log.debug(`Attempting to change active screen to: ${JSON.stringify(inData)}`);
 
         const oldId = this.currentScreen;
         let id: string;
 
         if (typeof inData === "string") {
-            id = inData as string;
+            id = (inData || "") as string;
         } else if (inData instanceof ScreenBase) {
             const potentialId = Object.keys(this.screens).find((x) => this.screens[x] === inData as ScreenBase);
             if (potentialId === undefined) {
@@ -45,6 +45,8 @@ export class UiManager extends Manager {
         if (this.screens[id] === undefined) {
             throw new Error(`Screen with id '${id}' does not exist!`);
         }
+
+        if (this.currentScreen === id) {return anime.timeline({autoplay: false}); }
 
         Log.debug(`Active screen change initialized: '${this.currentScreen}' => '${id}'.`);
         this._currentScreen = id;

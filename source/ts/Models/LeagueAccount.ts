@@ -5,7 +5,7 @@ import { LeagueAccountStatus } from "./LeagueAccountStatus";
 import { LeagueRegion } from "./LeagueRegion";
 
 export class LeagueAccount {
-    serverId: string | undefined;
+    serverId: string;
     accountId: number;
     username: string;
     password: string;
@@ -28,7 +28,7 @@ export class LeagueAccount {
         summoner: LolSummonerSummoner | undefined,
         wallet: LolStoreWallet | undefined,
     ) {
-        this.serverId = serverId;
+        this.serverId = serverId || "";
         this.accountId = accountId;
         this.username = username;
         this.password = password;

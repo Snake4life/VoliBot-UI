@@ -1,5 +1,5 @@
 import * as $ from "jquery";
-import { Accounts, Log, Notifications, VoliBotManager } from "../../Managers";
+import { Accounts, Log, Notifications } from "../../Managers";
 import { LeagueAccount } from "../../Models/LeagueAccount";
 import { LeagueAccountSettings } from "../../Models/LeagueAccountSettings";
 import { LeagueAccountStatus } from "../../Models/LeagueAccountStatus";
@@ -13,7 +13,13 @@ enum Modes {
 
 export class ComponentAddAccount extends ComponentBase {
     private importButton: JQuery<HTMLElement> = $();
+    private saveChangesButton: JQuery<HTMLElement> = $();
+    private regionSelectInput: JQuery<HTMLElement> = $();
+    private queueSelectInput: JQuery<HTMLElement> = $();
+    private activeToggleInput: JQuery<HTMLElement> = $();
+
     private currentImportingCreds: string[][] = [];
+
     private _mode: Modes = Modes.Add;
     private set mode(mode: Modes) {
         if (mode !== this._mode) {
@@ -27,12 +33,22 @@ export class ComponentAddAccount extends ComponentBase {
     }
 
     hookUi(): void {
+        //TODO: Standardize naming in PUG
         $("#AddAccount .AddAccount_Add").click(this.onAddAccountClick.bind(this));
 
         $("#account_settings__credentials_li").click(() => this.mode = Modes.Add);
         $("#account_settings__import_li").click(() => this.mode = Modes.Import);
+
+        this.regionSelectInput = $("#AddAccount select.AccountSettings_Server");
+        this.queueSelectInput = $("#AddAccount select.AccountSettings_Queue");
+
+        this.activeToggleInput = $("#AddAccount .AccountSettings_AutoPlay");
+
+        this.saveChangesButton = $("#accounts-preview__save_changes");
         this.importButton = $("#AddAccount .AddAccount_Import");
-        this.importButton.click(this.importAccountFile.bind(this));
+
+        this.saveChangesButton.click(this.onSaveChangesClick.bind(this));
+        this.importButton.click(this.onImportAccountClick.bind(this));
         this.updateImportButtonText();
     }
 
@@ -45,7 +61,73 @@ export class ComponentAddAccount extends ComponentBase {
         }
     }
 
-    private importAccountFile() {
+    private async onSaveChangesClick() {
+        this.doSaveChanges(Array.from<LeagueAccount>(Accounts.table.rows({ selected: true }).data() as any));
+    }
+
+    private async doSaveChanges(
+        accounts: LeagueAccount[],
+    ) {
+        const region: string = this.regionSelectInput.val() as string;
+        const queueString: string = this.queueSelectInput.val() as string;
+        const active: boolean = this.activeToggleInput.is(":checked");
+        const queue: number = parseInt(queueString, 10);
+        const parsedRegion: LeagueRegion | undefined = (LeagueRegion as any)[region];
+
+        if (parsedRegion !== undefined) {
+            const settings: LeagueAccountSettings = new LeagueAccountSettings(//TODO: TargetLevel & TargetBE
+                queue,
+                active,
+                -1,
+                -1,
+            );
+
+            const results = await Accounts.updateAccountSettings(accounts, settings);
+            const success = (results.filter((x) => x.result === true)
+                                   .map((x) => Accounts.getAccountByIds(x.serverId, x.accountId))
+                                   .filter((x) => x != null) as LeagueAccount[])
+                                   .map((x) => `[${x.serverId}] ${x.username}`);
+            const fail = (results.filter((x) => x.result === false)
+                                .map((x) => Accounts.getAccountByIds(x.serverId, x.accountId))
+                                .filter((x) => x != null) as LeagueAccount[])
+                                .map((x) => `[${x.serverId}] ${x.username}`);
+
+            if (success.length > 0) {
+                Notifications.addNotification(
+                    null,
+                    `Successfully applied changes to account${success.length === 1 ? "" : "s"}.`,
+                    success.join("\n"),
+                    true,
+                    undefined,
+                    "fas fa-check-circle",
+                );
+            }
+
+            if (fail.length > 0) {
+                Notifications.addNotification(
+                    null,
+                    `Failed to apply changes to account${fail.length === 1 ? "" : "s"}.`,
+                    fail.join("\n"),
+                    false,
+                    undefined,
+                    "fas fa-exclamation-triangle",
+                );
+            }
+        } else {
+            // tslint:disable-next-line:max-line-length
+            Log.warn(`Modifying account failed (Failed to parse Region): ${region}`);
+            Notifications.addNotification(
+                null,
+                "Failed to parse the selected settings.",
+                "This shouldn't happen, please tell the VoliBot team about it :)",
+                false,
+                undefined,
+                "fas fa-exclamation-triangle",
+            );
+        }
+    }
+
+    private onImportAccountClick() {
         const input = $(document.createElement("input"));
         input.attr("type", "file");
         input.attr("accept", "text/plain");
@@ -103,87 +185,81 @@ export class ComponentAddAccount extends ComponentBase {
             case Modes.Add:
                 const username: string    = $("#AddAccount .AddAccount_Username").val() as string;
                 const password: string    = $("#AddAccount .AddAccount_Password").val() as string;
-                this.doAddAccount(username, password);
+                this.doAddAccount([{username, password}]);
                 break;
             case Modes.Import:
-                this.currentImportingCreds.forEach((pair) => {
-                    this.doAddAccount(pair[0], pair[1]);
-                });
+                this.doAddAccount(this.currentImportingCreds.map((x) => ({username: x[0], password: x[1]})));
                 this.currentImportingCreds = [];
                 this.updateImportButtonText();
                 break;
         }
     }
 
-    private async doAddAccount(
-        username: string,
-        password: string,
-    ) {
-        const server: string      = $("#AddAccount select.AccountSettings_Server").val() as string;
-        const queueString: string = $("#AddAccount select.AccountSettings_Queue").val() as string;
-        const active: boolean   = $("#AddAccount .AccountSettings_AutoPlay").is(":checked");
+    private async doAddAccount(accounts: Array<{username: string, password: string}>) {
+        const region: string = this.regionSelectInput.val() as string;
+        const queueString: string = this.queueSelectInput.val() as string;
+        const active: boolean = this.activeToggleInput.is(":checked");
         const queue: number = parseInt(queueString, 10);
-
-        const parsedRegion: LeagueRegion | undefined = (LeagueRegion as any)[server];
+        const parsedRegion: LeagueRegion | undefined = (LeagueRegion as any)[region];
 
         if (parsedRegion !== undefined) {
-            // tslint:disable-next-line:max-line-length
-            Log.info(`Adding account:\nName: ${username}, Server: ${server}, Queue: ${queue} (${queueString}), Active: ${active}`);
+            const settings: LeagueAccountSettings = new LeagueAccountSettings(//TODO: TargetLevel & TargetBE
+                queue,
+                active,
+                -1,
+                -1,
+            );
 
-            const existingAccounts = VoliBotManager.getAllClients()
-                                                   .filter((x) => x.username === username &&
-                                                                  x.region === parsedRegion);
-
-            if (existingAccounts.length > 0) {
-                Notifications.addNotification(
-                    null,
-                    "Avoided duplicate registration.",
-                    `${username} is already registered on core(s):\n` +
-                    existingAccounts
-                        .map((x) => x.serverId)
-                        .join("\r\n"),
-                    false,
+            const leagueAccounts = accounts.map((x) =>
+                new LeagueAccount(
                     undefined,
-                    "fas fa-exclamation-triangle",
-                );
-            } else {
-                const account: LeagueAccount = new LeagueAccount(
-                    "",
                     -1,
-                    username,
-                    password,
+                    x.username,
+                    x.password,
                     parsedRegion,
-                    new LeagueAccountSettings(queue, active, -1, -1), //TODO: TargetLevel & TargetBE
+                    settings,
                     LeagueAccountStatus.None,
                     undefined,
                     undefined,
-                );
+                ));
 
-                const result = await Accounts.addAccount(account);
-                if (result != null) {
+            const results = await Accounts.createAccount(leagueAccounts);
+            const success = (results.map((x) => x.result)
+                                    .filter((x) => typeof x !== "string") as LeagueAccount[])
+                                    .map((x) => `[${x.username}] ${x.serverId}`);
+
+            const fail = results.filter((x) => typeof x.result === "string")
+                                .map((x) => `[${x.account.username}] ${x.result}`);
+
+            if (success.length > 0) {
+                success.forEach((x) =>
                     Notifications.addNotification(
                         null,
-                        "Successfully added account!",
-                        `Core: ${account.serverId}\nRegion: ${result.region}\nUsername: ${result.username}`,
+                        "Successfully added account.",
+                        x,
                         true,
                         undefined,
                         "fas fa-check-circle",
-                    );
-                } else {
-                    failedToAddAccount();
-                }
+                    ));
+            }
+
+            if (fail.length > 0) {
+                fail.forEach((x) =>
+                    Notifications.addNotification(
+                        null,
+                        "Failed to add account.",
+                        x,
+                        false,
+                        undefined,
+                        "fas fa-exclamation-triangle",
+                    ));
             }
         } else {
-            // tslint:disable-next-line:max-line-length
-            Log.warn(`Adding account failed (Failed to parse Region):\nName: ${username}, Server: ${server}, Queue: ${queue}, Active: ${active}`);
-            failedToAddAccount();
-        }
-
-        function failedToAddAccount() {
+            Log.warn(`Adding account failed (Failed to parse Region): ${region}`);
             Notifications.addNotification(
                 null,
-                "Failed to add account!",
-                `Region: ${parsedRegion || "Unknown Region"}\nUsername: ${username}`,
+                "Failed to parse the selected settings.",
+                "This shouldn't happen, please tell the VoliBot team about it :)",
                 false,
                 undefined,
                 "fas fa-exclamation-triangle",

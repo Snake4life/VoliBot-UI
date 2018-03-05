@@ -1,29 +1,87 @@
 import { LeagueAccount } from "../Models/LeagueAccount";
 import { VoliBot } from "../VoliBot";
+import { Log, Notifications, UI } from "./";
 
 //TODO: Rename to something that makes sense
 export class VoliBotManagerClass {
     private voliBotInstances: VoliBot[] = new Array<VoliBot>();
     private defaultWsCallbacks: { [id: string]: (data: any, serverId: string) => void } = { };
-    private newVoliBotCore: (core: VoliBot) => void = (() => { /* */ });
+    private voliBotConnected: (core: VoliBot, ev: Event) => void = (() => { /* */ });
+    private voliBotDisconnected: (core: VoliBot, ev: CloseEvent) => void = (() => { /* */ });
 
-    initialize() { /* */ }
+    initialize() {
+        const setFittingScreen = () => {
+            if (this.connectedInstanceCount === 0) {
+                UI.setCurrentScreen("Login");
+            } else {
+                UI.setCurrentScreen("Main");
+            }
+        };
 
-    getAllClients() {
+        this.doOnVoliBotConnected(setFittingScreen);
+        this.doOnVoliBotDisconnected(setFittingScreen);
+
+        this.doOnVoliBotDisconnected((instance, ev) => {
+            if (!instance.hasConnected || ev.wasClean) {return; }
+            const id = Math.random().toString(36).replace(/[^a-z]+/g, "").substr(0, 5);
+            Notifications.addNotification(id,
+                "Disconnected from a Core!",
+                "You have disconnected from a Core, click here to attempt to reconnect.\n" +
+                "CoreID: " + instance.serverId,
+                false,
+                () => attemptReconnect(id, instance),
+                "fas fa-unlink",
+            );
+        });
+
+        async function attemptReconnect(notificationId: string, instance: VoliBot) {
+            Notifications.closeNotification(notificationId);
+            if (await VoliBotManager.addVoliBotInstance(instance.hostname, instance.port)) {
+                Notifications.addNotification(
+                    notificationId,
+                    "Reconnected to Core.",
+                    `CoreID: ${instance.serverId}`,
+                    true,
+                    undefined,
+                    "fas fa-check-circle",
+                );
+            } else {
+                Notifications.addNotification(
+                    notificationId,
+                    "Could not reconnect to Core.",
+                    "Click to try again.\n" +
+                    `CoreID: ${instance.serverId}`,
+                    false,
+                    () => attemptReconnect(notificationId, instance),
+                    "fas fa-exclamation-triangle",
+                );
+            }
+        }
+    }
+
+    getAllClients(filter?: (account: LeagueAccount) => boolean) {
         let clients: LeagueAccount[] = [];
 
         this.voliBotInstances.forEach((x) => {
-            clients = clients.concat(x.ClientsArray);
+            clients = filter ? clients.concat(x.ClientsArray.filter(filter)) : clients.concat(x.ClientsArray);
         });
 
         return clients;
     }
 
-    doOnVoliBotConnected(handler: (core: VoliBot) => void) {
-        const originalCallback = this.newVoliBotCore;
-        this.newVoliBotCore = ((bot: VoliBot) => {
-            originalCallback(bot);
-            handler(bot);
+    doOnVoliBotConnected(handler: (core: VoliBot, ev: Event) => void) {
+        const originalCallback = this.voliBotConnected;
+        this.voliBotConnected = ((bot: VoliBot, ev: Event) => {
+            originalCallback(bot, ev);
+            handler(bot, ev);
+        }).bind(this);
+    }
+
+    doOnVoliBotDisconnected(handler: (core: VoliBot, ev: CloseEvent) => void) {
+        const originalCallback = this.voliBotDisconnected;
+        this.voliBotDisconnected = ((core: VoliBot, ev: CloseEvent) => {
+            originalCallback(core, ev);
+            handler(core, ev);
         }).bind(this);
     }
 
@@ -63,8 +121,8 @@ export class VoliBotManagerClass {
     async addVoliBotInstance(url: string, port: number) {
         return new Promise<boolean>((resolve) => {
             try {
-                const voliBot = new VoliBot(url, port, (x) => {
-                    this.onVoliBotOpen(x);
+                const voliBot = new VoliBot(url, port, (x, y) => {
+                    this.onVoliBotOpen(x, y);
                     resolve(true);
                 }, (x, y) => {
                     this.onVoliBotClose(x, y);
@@ -79,24 +137,27 @@ export class VoliBotManagerClass {
         });
     }
 
-    getByServerId(serverId: string): VoliBot | undefined {
+    getServerById(serverId: string): VoliBot | undefined {
         const result = this.voliBotInstances.filter((bot) => bot.serverId === serverId);
         return result.length > 0 ? result[0] : undefined;
     }
 
-    private onVoliBotOpen(volibot: VoliBot) {
+    private onVoliBotOpen(volibot: VoliBot, ev: Event) {
         this.voliBotInstances.push(volibot);
-        this.newVoliBotCore(volibot);
+        this.voliBotConnected(volibot, ev);
     }
 
-    private onVoliBotClose(bot: VoliBot, _args: any) {
-        this.removeBot(bot);
+    private onVoliBotClose(volibot: VoliBot, ev: CloseEvent) {
+        this.removeBot(volibot);
+        this.voliBotDisconnected(volibot, ev);
     }
 
     private removeBot(bot: VoliBot) {
         const index = this.voliBotInstances.indexOf(bot, 0);
         if (index > -1) {
             this.voliBotInstances.splice(index, 1);
+        } else {
+            Log.warn("Failed to remove VoliBot instance from VoliBotManager.");
         }
     }
 }

@@ -6,7 +6,7 @@
 import * as $ from "jquery";
 
 import { ComponentBase } from "../";
-import { VoliBotManager } from "../../../Managers";
+import { Accounts, VoliBotManager } from "../../../Managers";
 import { LeagueAccount } from "../../../Models/LeagueAccount";
 import { LeagueAccountStatus } from "../../../Models/LeagueAccountStatus";
 import { LeagueAccountLevel } from "./LeagueAccountLevel";
@@ -26,7 +26,6 @@ require("datatables.net-select")(window, $);
 //#endregion
 
 export class ComponentAccountsList extends ComponentBase {
-    private accountsTable: any;
     private statusText: {[index: number]: string} = {
         [LeagueAccountStatus.None]:             "Inactive",
         [LeagueAccountStatus.LoggedIn]:         "Logged in",
@@ -45,25 +44,30 @@ export class ComponentAccountsList extends ComponentBase {
         this.initializeDataTable();
 
         VoliBotManager.doOnVoliBotConnected((instance) => {
-            this.accountsTable
+            Accounts.table
                 .rows
                 .add(instance.ClientsArray)
                 .draw();
         });
 
-        //TODO: Handle all events
+        VoliBotManager.doOnVoliBotDisconnected((instance) => {
+            Accounts.table
+                .rows((_index: number, x: LeagueAccount) => instance.serverId === x.serverId)
+                .remove()
+                .draw();
+        });
     }
 
     onCreatedAccount(account: LeagueAccount, serverId: string) {
         account.serverId = serverId;
-        this.accountsTable
+        Accounts.table
             .row
             .add(account)
             .draw();
     }
 
     onDeletedAccount(accountId: number, serverId: string) {
-        this.accountsTable
+        Accounts.table
             .rows((_index: number, data: LeagueAccount) =>
                     data.serverId === serverId &&
                     data.accountId === accountId)
@@ -72,21 +76,21 @@ export class ComponentAccountsList extends ComponentBase {
     }
 
     onUpdatedAccount(account: LeagueAccount, serverId: string) {
+        //TODO: Needs testing
         account.serverId = serverId;
-        Array.from<LeagueAccount>(this.accountsTable
+        Accounts.table
             .rows((_index: number, data: LeagueAccount) =>
                     data.serverId === serverId &&
                     data.accountId === account.accountId)
-            .data())
-            .forEach((_element: LeagueAccount) => {
-                Object.assign(_element, account);
+            .every(function(this: any) {
+                Object.assign(this.data, account);
             });
 
-        this.accountsTable.draw();
+        Accounts.table.draw();
     }
 
     private initializeDataTable() {
-        this.accountsTable = $(".datatable").DataTable({
+        Accounts.table = $(".datatable").DataTable({
             columnDefs: [
                 {
                     targets: 1,
@@ -127,12 +131,11 @@ export class ComponentAccountsList extends ComponentBase {
         });
 
         $('a[data-toggle="tab"]').on("shown.bs.tab", () => {
-            this.accountsTable.columns.adjust();
+            Accounts.table.columns.adjust();
         });
 
-        const table = this.accountsTable;
         $(".datalist-filter__search input").on("keyup", function(this: HTMLInputElement) {
-            table.search(this.value).draw();
+            Accounts.table.search(this.value).draw();
         });
     }
 }

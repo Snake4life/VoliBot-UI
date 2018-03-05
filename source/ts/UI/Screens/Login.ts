@@ -136,22 +136,9 @@ export class ScreenLogin extends ScreenBase {
             Notifications.fullscreenNotification({
                 showConfirmButton: true,
                 text: "Check the IP Address / Hostname and make sure that VoliBot is up and running",
-                title: "Failed to connect",
+                title: "Failed to connect" ,
                 type: "error",
             });
-        } else {
-            UI.currentScreen = "Main";
-
-            for (let i = 0; i < success.length; i++) {
-                if (!success[i]) {
-                    Notifications.addNotification(
-                        "Failed to connect to instance:",
-                        hostnames[i],
-                        "fa fa-exclamation-circle",
-                        false,
-                    );
-                }
-            }
         }
     }
 

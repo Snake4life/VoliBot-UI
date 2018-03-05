@@ -12,18 +12,31 @@ import { LeagueAccountSettings } from "./Models/LeagueAccountSettings";
 export class VoliBot {
     socket: WebSocket;
     serverId: string;
+    readonly hostname: string;
+    readonly port: number;
     private clients: { [id: string]: LeagueAccount } = { };
     private wsCallbacks: { [id: string]: (data: any, serverId: string, packet: any) => void } = { };
+    private _hasConnected: boolean;
+
+    get hasConnected() {
+        return this._hasConnected;
+    }
 
     constructor(
         hostname: string,
         port: number,
-        onOpen?: (bot: VoliBot, args?: any[]) => void,
-        onClose?: (bot: VoliBot, args?: any[]) => void) {
+        onOpen?: (bot: VoliBot, args: Event) => void,
+        onClose?: (bot: VoliBot, ev: CloseEvent) => void) {
+        this.hostname = hostname;
+        this.port = port;
+
         this.serverId = hostname;
         this.socket = new WebSocket("ws://" + hostname + ":" + port + "/volibot");
 
-        this.socket.onopen = async (...args: any[]) => {
+        this._hasConnected = false;
+        this.socket.onopen = async (ev: Event) => {
+            this._hasConnected = true;
+
             this.addCallbackHandler("UpdatedDefaultSettings", this.onUpdatedDefaultSettings.bind(this));
             this.addCallbackHandler("CreatedAccount",         this.onCreatedAccount.bind(this));
             this.addCallbackHandler("DeletedAccount",         this.onDeletedAccount.bind(this));
@@ -44,7 +57,7 @@ export class VoliBot {
             }, this);
 
             if (onOpen !== undefined) {
-                onOpen(this, ...args);
+                onOpen(this, ev);
             }
         };
 
@@ -52,9 +65,9 @@ export class VoliBot {
             Log.warn("WebSocket onError: " + JSON.stringify(error));
         };
 
-        this.socket.onclose = (...args: any[]) => {
+        this.socket.onclose = (ev: CloseEvent) => {
             if (onClose !== undefined) {
-                onClose(this, ...args);
+                onClose(this, ev);
             }
         };
 
@@ -129,15 +142,23 @@ export class VoliBot {
 
     //#region New spec
     async getAccountList(): Promise<LeagueAccount[]> {
-        return this.sendAsync("GetAccountList");
+        const response = await this.sendAsync("GetAccountList");
+        if (response != null) {
+            (response as LeagueAccount[]).forEach((x) => x.serverId = this.serverId);
+        }
+        return response;
     }
 
     async getDefaultSettings(): Promise<LeagueAccountSettings> {
         return this.sendAsync("GetDefaultSettings");
     }
 
-    async getAccountDetails(accountId: number): Promise<LeagueAccount> {
-        return this.sendAsync("GetAccountDetails", accountId);
+    async getAccountDetails(accountId: number): Promise<LeagueAccount | null> {
+        const response = await this.sendAsync("GetAccountDetails", accountId);
+        if (response != null) {
+            (response as LeagueAccount).serverId = this.serverId;
+        }
+        return response;
     }
 
     async deleteAccount(accountId: number): Promise<boolean> {
@@ -145,7 +166,11 @@ export class VoliBot {
     }
 
     async createAccount(account: LeagueAccount): Promise<LeagueAccount | null> {
-        return this.sendAsync("CreateAccount", account);
+        const response = await this.sendAsync("CreateAccount", account);
+        if (response != null) {
+            (response as LeagueAccount).serverId = this.serverId;
+        }
+        return response;
     }
 
     async updateAccountSettings(accountId: number, settings: LeagueAccountSettings): Promise<boolean> {
@@ -168,8 +193,7 @@ export class VoliBot {
         // FEATURE: Default Settings
     }
 
-    private onCreatedAccount(data: any) {
-        const acc = data as LeagueAccount;
+    private onCreatedAccount(acc: LeagueAccount) {
         acc.serverId = this.serverId;
         this.clients[acc.accountId] = acc;
     }
@@ -178,8 +202,7 @@ export class VoliBot {
         delete this.clients[id];
     }
 
-    private onUpdatedAccount(data: any) {
-        const acc = JSON.parse(data) as LeagueAccount;
+    private onUpdatedAccount(acc: LeagueAccount) {
         acc.serverId = this.serverId;
         Object.assign(this.clients[acc.accountId], acc);
     }

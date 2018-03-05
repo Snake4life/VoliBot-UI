@@ -2,12 +2,12 @@
     .panel-heading
         h3.panel-title Add Account
     .panel-body
-        ul.nav.nav-tabs
+        ul.nav.nav-pills
             li.active#account_settings__credentials_li
                 a(data-toggle="tab", href="#account_settings__credentials") Add
             li#account_settings__import_li
                 a(data-toggle="tab", href="#account_settings__import") Import
-        .tab-content(style="padding:11px 0 0 0")
+        .tab-content(style="padding:0")
             .tab-pane.fade.in.active#account_settings__credentials
                 .form-group
                     .input-group
@@ -22,13 +22,15 @@
             .tab-pane.fade#account_settings__import
                 .form-group
                     button.btn.btn-primary.btn-block.AddAccount_Import
-        include ./parts/account_settings.pug
+        div
+            include ./parts/account_settings.pug
         .form-group
-            button.btn.btn-primary.btn-block.AddAccount_Add Add Account
+            button.btn.btn-primary.btn-block.AddAccount_Add Add account
 .panel.panel-info.accounts-preview__selected#EditAccount
     .panel-heading
         h3.panel-title Account Settings
     .panel-body
-        include ./parts/account_settings.pug
+        div
+            include ./parts/account_settings.pug
         .form-group
-            button.btn.btn-primary.btn-block.accounts-preview__extract Save Changes
+            button.btn.btn-primary.btn-block#accounts-preview__save_changes Save changes
