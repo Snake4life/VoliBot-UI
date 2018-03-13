@@ -232,15 +232,24 @@ export class ComponentAddAccount extends ComponentBase {
                                 .map((x) => `[${x.account.username}] ${x.result}`);
 
             if (success.length > 0) {
-                success.forEach((x) =>
+                if (success.length > 5) {
+                    successNotification(success);
+                } else {
+                    success.forEach(successNotification);
+                }
+
+                function successNotification(name: string | string[]) {
                     Notifications.addNotification(
                         null,
-                        "Successfully added account.",
-                        x,
+                        `Successfully added account${Array.isArray(name) && name.length !==  1 ? "s" : ""}.`,
+                        Array.isArray(name) ?
+                            name.slice(0, 10).join("\n") + (name.length > 10 ? `<br>+${name.length - 10} more` : "") :
+                            name,
                         true,
                         undefined,
                         "fas fa-check-circle",
-                    ));
+                    );
+                }
             }
 
             if (fail.length > 0) {
